@@ -1,0 +1,2 @@
+Usando lenguaje ensamblador de MARIE, leer tres coeficientes a, b, c, leer el valor de X y
+evaluar el polinomio a * X ^ 2 + b * X + c, mostrar el resultado en pantalla.

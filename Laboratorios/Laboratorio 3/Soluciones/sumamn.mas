@@ -1,0 +1,58 @@
+/Programa que calcula la suma de m hasta m inclusive
+/Autor: Juan Esteban Sanchez Garcia 
+/Read n cases 
+
+/-- Main -- 
+
+Main, INPUT 
+      STORE n 
+
+LoopCases, 
+      LOAD n 
+      SKIPCOND 400
+      JUMP 
+      JUMP 
+
+ProcessCase, 
+      INPUT 
+      STORE m
+      INPUT 
+      STORE n2 
+
+      CLEAR 
+      STORE total 
+
+      LOAD m 
+      STORE i 
+
+SumLoop, 
+      LOAD total 
+      ADD i 
+      STORE total 
+
+      LOAD i 
+      ADD one 
+      STORE i 
+
+      LOAD i 
+      SUBT n2
+      SKIPCOND 800 
+      JUMP 
+
+      LOAD n 
+      SUBT one 
+      STORE n 
+
+      JUMP 
+
+End,  HALT 
+
+/-- Variables 
+
+
+n,    DEC 0
+m,    DEC 0 
+n2,   DEC 0
+i,    DEC 0 
+total,DEC 0
+one,  DEC 1

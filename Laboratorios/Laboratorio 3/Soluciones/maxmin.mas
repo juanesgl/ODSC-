@@ -1,0 +1,76 @@
+/ Programa que genera la suma del max y min de 3 numeros 
+/ Autor: Juan Esteban Sanchez Garcia 
+/ Read n cases 
+
+Main,   INPUT 
+        STORE n 
+
+LoopCases, LOAD n 
+        SKIPCOND 400        / si n == 0 -> End
+        JUMP ProcessCase    / si n > 0 procesar caso
+        JUMP End            / si n == 0 saltar a fin
+
+ProcessCase, INPUT 
+        STORE x 
+
+        INPUT 
+        STORE y 
+
+        INPUT 
+        STORE z 
+
+/ ---- Inicializar max y min ----
+        LOAD x 
+        STORE max 
+        STORE min 
+
+/ ---- Comparar y con max ----
+        LOAD y 
+        SUBT max 
+        SKIPCOND 800        / si y > max
+        JUMP SkipYMax 
+        LOAD y 
+        STORE max  
+
+SkipYMax, LOAD z              / etiqueta con instrucción
+        SUBT max 
+        SKIPCOND 800 
+        JUMP SkipZMax 
+        LOAD z 
+        STORE max 
+
+SkipZMax, LOAD min 
+        SUBT y
+        SKIPCOND 800         / si min > y
+        JUMP SkipYMin 
+        LOAD y
+        STORE min 
+
+SkipYMin, LOAD min 
+        SUBT z
+        SKIPCOND 800         / si min > z
+        JUMP SkipZMin 
+        LOAD z
+        STORE min 
+      
+SkipZMin, LOAD max 
+        ADD min 
+        OUTPUT   
+
+/ ---- Decrementar casos ----
+        LOAD n 
+        SUBT one 
+        STORE n 
+
+        JUMP LoopCases 
+
+End,    HALT  
+
+/ ---------------- Variables ----------------
+n,      DEC 0
+x,      DEC 0
+y,      DEC 0
+z,      DEC 0
+max,    DEC 0
+min,    DEC 0
+one,    DEC 1

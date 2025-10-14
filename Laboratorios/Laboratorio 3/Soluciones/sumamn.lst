@@ -1,0 +1,80 @@
+     Assembly listing for: sumamn.mas
+                Assembled: Tue Oct 14 17:20:38 GMT-05:00 2025
+
+         |                                    / Programa que calcula la suma de m hasta n inclusive
+         |                                    / Autor: Juan Esteban Sanchez Garcia
+         |                                    
+         |                                    / -- Main --
+000 5000 |  Main        INPUT                  
+001 201F |              STORE n                
+         |                                    
+002 101F |  LoopCases   LOAD n                 
+003 8400 |              SKIPCOND 400          / si n == 0, saltar a End
+004 9006 |              JUMP ProcessCase       
+005 901E |              JUMP End               
+         |                                    
+006 5000 |  ProcessCase INPUT                 / leer m
+007 2020 |              STORE m                
+008 5000 |              INPUT                 / leer n2
+009 2021 |              STORE n2               
+         |                                    
+00A A000 |              CLEAR                  
+00B 2023 |              STORE total           / total = 0
+         |                                    
+00C 1020 |              LOAD m                 
+00D 2022 |              STORE i               / i = m
+         |                                    
+00E 1023 |  SumLoop     LOAD total             
+00F 3022 |              ADD i                  
+010 2023 |              STORE total           / total += i
+         |                                    
+011 1022 |              LOAD i                 
+012 3024 |              ADD one                
+013 2022 |              STORE i               / i++
+         |                                    
+014 1022 |              LOAD i                 
+015 4021 |              SUBT n2                
+016 8800 |              SKIPCOND 800          / si i > n2, saltar salida bucle
+017 900E |              JUMP SumLoop           
+         |                                    
+         |                                            / salir del bucle
+018 1023 |              LOAD total             
+019 6000 |              OUTPUT                 
+         |                                    
+01A 101F |              LOAD n                 
+01B 4024 |              SUBT one               
+01C 201F |              STORE n               / n--
+         |                                    
+01D 9002 |              JUMP LoopCases         
+         |                                    
+01E 7000 |  End         HALT                   
+         |                                    
+         |                                    
+         |                                    / -- Variables --
+01F 0000 |  n           DEC 0                  
+020 0000 |  m           DEC 0                  
+021 0000 |  n2          DEC 0                  
+022 0000 |  i           DEC 0                  
+023 0000 |  total       DEC 0                  
+024 0001 |  one         DEC 1                  
+
+Assembly successful.
+
+         SYMBOL TABLE
+         -------------------------------------------------------
+          Symbol      | Defined | References 
+         -------------+---------+-------------------------------
+          End         |   01E   | 005
+          LoopCases   |   002   | 01D
+          Main        |   000   | 
+          ProcessCase |   006   | 004
+          SumLoop     |   00E   | 017
+          i           |   022   | 00D, 00F, 011, 013, 014
+          m           |   020   | 007, 00C
+          n           |   01F   | 001, 002, 01A, 01C
+          n2          |   021   | 009, 015
+          one         |   024   | 012, 01B
+          total       |   023   | 00B, 00E, 010, 018
+         -------------------------------------------------------
+
+

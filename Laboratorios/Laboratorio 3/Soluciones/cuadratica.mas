@@ -1,0 +1,199 @@
+/ Program: Calculate the number of real roots of a quadratic equation
+/ Author: Juan Esteban Sánchez García
+
+            ORG 100          / Program start address
+   
+            INPUT            / Read number of test cases
+            STORE num_cases
+
+case_loop,  LOAD num_cases
+            SKIPCOND 400     / If num_cases == 0, end program
+            JUMP process_case
+            JUMP end_program
+
+process_case, INPUT           / Read coefficient a
+            STORE coef_a
+            INPUT             / Read coefficient b
+            STORE coef_b
+            INPUT             / Read coefficient c
+            STORE coef_c
+
+/ --------------------------- 
+/ Compute b^2 
+/ --------------------------- 
+            LOAD coef_b
+            STORE mult_op1       / First operand for multiplication
+            LOAD coef_b
+            STORE mult_op2       / Second operand
+            JNS multiply
+            STORE b_squared      / Save b^2
+
+/ --------------------------- 
+/ Compute 4ac 
+/ --------------------------- 
+        / Compute a*c
+            LOAD coef_a
+            STORE mult_op1
+            LOAD coef_c
+            STORE mult_op2
+            JNS multiply
+            STORE fourac         
+
+        / Multiply by 4
+            LOAD fourac
+            STORE mult_op1
+            LOAD const_four
+            STORE mult_op2
+            JNS multiply
+            STORE fourac
+
+/ --------------------------- 
+/ Compute discriminant d = b^2 - 4ac 
+/ --------------------------- 
+            LOAD b_squared
+            SUBT fourac
+            STORE discriminant
+
+/ --------------------------- 
+/ Determine number of real roots 
+/ --------------------------- 
+            LOAD discriminant
+            SKIPCOND 000         / If d < 0
+            JUMP check_zero
+            JUMP is_negative
+
+check_zero, SKIPCOND 400         / If d == 0
+            JUMP is_positive     / If not zero, d > 0
+            JUMP is_zero
+
+is_negative, LOAD roots_0        / 0 real roots
+            OUTPUT
+            JUMP next_case
+
+is_zero,    LOAD roots_1         / 1 real root
+            OUTPUT
+            JUMP next_case
+
+is_positive, LOAD roots_2        / 2 real roots
+            OUTPUT
+            JUMP next_case
+
+/ --------------------------- 
+/ Prepare next case 
+/ --------------------------- 
+next_case,  LOAD num_cases
+            SUBT const_one
+            STORE num_cases
+            JUMP case_loop
+
+/ --------------------------- 
+/ End of program 
+/ --------------------------- 
+end_program, HALT
+
+/ --------------------------- 
+/ Subroutine: multiply (general version)
+/ --------------------------- 
+
+multiply,   HEX 0                / Return address
+            
+            CLEAR
+            STORE mult_result
+            CLEAR
+            STORE neg_flag        / Sign flag (0 = +, 1 = -)
+
+        / --- Check signs
+
+check_signs, LOAD mult_op1
+            SKIPCOND 800          / If mult_op1 > 0
+            JUMP check_second     / If mult_op1 < 0, handle negative case
+            JUMP swap_operands    / If positive, proceed normally
+
+check_second, LOAD mult_op2 
+            SKIPCOND 800          / If mult_op2 > 0, go to core multiplication
+            JUMP fix_sign         / If mult_op2 < 0, make positive
+            JNS mult_core
+            JUMP finalize_mult
+
+fix_sign,   CLEAR
+            SUBT mult_op2         / mult_op2 = -mult_op2
+            STORE mult_op2
+            LOAD neg_flag
+            ADD const_one 
+            STORE neg_flag
+            JNS mult_core
+            JUMP finalize_mult
+
+swap_operands, LOAD mult_op1     / Ensure second operand is positive
+            STORE temp
+            LOAD mult_op2
+            STORE mult_op1
+            LOAD temp
+            STORE mult_op2
+            JNS mult_core
+            JUMP finalize_mult
+
+finalize_mult, LOAD neg_flag
+            SKIPCOND 400          / If neg_flag == 0, result is already positive
+            JUMP fix_result_sign  / Otherwise, make result positive
+            JUMP mult_end
+
+fix_result_sign, CLEAR
+            SUBT mult_result      / mult_result = -mult_result
+            STORE mult_result
+            JUMP mult_end
+
+mult_end,   LOAD mult_result
+            JUMPI multiply
+
+/ --------------------------- 
+/ Subroutine: mult_core (pure positive multiplication)
+/ --------------------------- 
+
+mult_core,  HEX 0                / Return address
+            
+            CLEAR
+            STORE mult_result
+
+mult_loop,  LOAD mult_op2
+            SKIPCOND 400          / If counter == 0, exit loop
+            JUMP continue_mult
+            JUMP end_mult_core
+
+continue_mult, LOAD mult_result
+            ADD mult_op1
+            STORE mult_result
+
+            LOAD mult_op2
+            SUBT const_one
+            STORE mult_op2
+            JUMP mult_loop
+
+end_mult_core, JUMPI mult_core
+
+/ --------------------------- 
+/ Variables 
+/ --------------------------- 
+num_cases,      DEC 0
+coef_a,         DEC 0
+coef_b,         DEC 0
+coef_c,         DEC 0
+b_squared,      DEC 0
+fourac,         DEC 0
+discriminant,   DEC 0
+
+/ Multiplication helpers 
+mult_op1,       DEC 0
+mult_op2,       DEC 0
+mult_result,    DEC 0
+temp,           DEC 0
+neg_flag,       DEC 0
+
+/ --------------------------- 
+/ Constants 
+/ --------------------------- 
+const_one,      DEC 1 
+const_four,     DEC 4
+roots_0,        DEC 0   / Number of real roots
+roots_1,        DEC 1
+roots_2,        DEC 2

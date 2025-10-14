@@ -1,0 +1,104 @@
+     Assembly listing for: maxmin.mas
+                Assembled: Tue Oct 14 17:19:14 GMT-05:00 2025
+
+         |                                    / Programa que genera la suma del max y min de 3 numeros 
+         |                                    / Autor: Juan Esteban Sanchez Garcia 
+         |                                    / Read n cases 
+         |                                    
+000 5000 |  Main        INPUT                  
+001 202F |              STORE n                
+         |                                    
+002 102F |  LoopCases   LOAD n                 
+003 8400 |              SKIPCOND 400          / si n == 0 -> End
+004 9006 |              JUMP ProcessCase      / si n > 0 procesar caso
+005 902E |              JUMP End              / si n == 0 saltar a fin
+         |                                    
+006 5000 |  ProcessCase INPUT                  
+007 2030 |              STORE x                
+         |                                    
+008 5000 |              INPUT                  
+009 2031 |              STORE y                
+         |                                    
+00A 5000 |              INPUT                  
+00B 2032 |              STORE z                
+         |                                    
+         |                                    / ---- Inicializar max y min ----
+00C 1030 |              LOAD x                 
+00D 2033 |              STORE max              
+00E 2034 |              STORE min              
+         |                                    
+         |                                    / ---- Comparar y con max ----
+00F 1031 |              LOAD y                 
+010 4033 |              SUBT max               
+011 8800 |              SKIPCOND 800          / si y > max
+012 9015 |              JUMP SkipYMax          
+013 1031 |              LOAD y                 
+014 2033 |              STORE max              
+         |                                    
+015 1032 |  SkipYMax    LOAD z                / etiqueta con instrucción
+016 4033 |              SUBT max               
+017 8800 |              SKIPCOND 800           
+018 901B |              JUMP SkipZMax          
+019 1032 |              LOAD z                 
+01A 2033 |              STORE max              
+         |                                    
+01B 1034 |  SkipZMax    LOAD min               
+01C 4031 |              SUBT y                 
+01D 8800 |              SKIPCOND 800          / si min > y
+01E 9021 |              JUMP SkipYMin          
+01F 1031 |              LOAD y                 
+020 2034 |              STORE min              
+         |                                    
+021 1034 |  SkipYMin    LOAD min               
+022 4032 |              SUBT z                 
+023 8800 |              SKIPCOND 800          / si min > z
+024 9027 |              JUMP SkipZMin          
+025 1032 |              LOAD z                 
+026 2034 |              STORE min              
+         |                                          
+027 1033 |  SkipZMin    LOAD max               
+028 3034 |              ADD min                
+029 6000 |              OUTPUT                 
+         |                                    
+         |                                    / ---- Decrementar casos ----
+02A 102F |              LOAD n                 
+02B 4035 |              SUBT one               
+02C 202F |              STORE n                
+         |                                    
+02D 9002 |              JUMP LoopCases         
+         |                                    
+02E 7000 |  End         HALT                   
+         |                                    
+         |                                    / ---------------- Variables ----------------
+02F 0000 |  n           DEC 0                  
+030 0000 |  x           DEC 0                  
+031 0000 |  y           DEC 0                  
+032 0000 |  z           DEC 0                  
+033 0000 |  max         DEC 0                  
+034 0000 |  min         DEC 0                  
+035 0001 |  one         DEC 1                  
+
+Assembly successful.
+
+         SYMBOL TABLE
+         -------------------------------------------------------
+          Symbol      | Defined | References 
+         -------------+---------+-------------------------------
+          End         |   02E   | 005
+          LoopCases   |   002   | 02D
+          Main        |   000   | 
+          ProcessCase |   006   | 004
+          SkipYMax    |   015   | 012
+          SkipYMin    |   021   | 01E
+          SkipZMax    |   01B   | 018
+          SkipZMin    |   027   | 024
+          max         |   033   | 00D, 010, 014, 016, 01A, 027
+          min         |   034   | 00E, 01B, 020, 021, 026, 028
+          n           |   02F   | 001, 002, 02A, 02C
+          one         |   035   | 02B
+          x           |   030   | 007, 00C
+          y           |   031   | 009, 00F, 013, 01C, 01F
+          z           |   032   | 00B, 015, 019, 022, 025
+         -------------------------------------------------------
+
+

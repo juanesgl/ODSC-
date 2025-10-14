@@ -1,0 +1,252 @@
+     Assembly listing for: cuadratica.mas
+                Assembled: Tue Oct 14 17:11:39 GMT-05:00 2025
+
+         |                                            / Program: Calculate the number of real roots of a quadratic equation
+         |                                            / Author: Juan Esteban Sánchez García
+         |                                            
+         |                  ORG 100                   / Program start address
+         |                                               
+100 5000 |                  INPUT                     / Read number of test cases
+101 216D |                  STORE num_cases            
+         |                                            
+102 116D |  case_loop       LOAD num_cases             
+103 8400 |                  SKIPCOND 400              / If num_cases == 0, end program
+104 9106 |                  JUMP process_case          
+105 9135 |                  JUMP end_program           
+         |                                            
+106 5000 |  process_case    INPUT                     / Read coefficient a
+107 216E |                  STORE coef_a               
+108 5000 |                  INPUT                     / Read coefficient b
+109 216F |                  STORE coef_b               
+10A 5000 |                  INPUT                     / Read coefficient c
+10B 2170 |                  STORE coef_c               
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Compute b^2 
+         |                                            / --------------------------- 
+10C 116F |                  LOAD coef_b                
+10D 2174 |                  STORE mult_op1            / First operand for multiplication
+10E 116F |                  LOAD coef_b                
+10F 2175 |                  STORE mult_op2            / Second operand
+110 0136 |                  JNS multiply               
+111 2171 |                  STORE b_squared           / Save b^2
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Compute 4ac 
+         |                                            / --------------------------- 
+         |                                                    / Compute a*c
+112 116E |                  LOAD coef_a                
+113 2174 |                  STORE mult_op1             
+114 1170 |                  LOAD coef_c                
+115 2175 |                  STORE mult_op2             
+116 0136 |                  JNS multiply               
+117 2172 |                  STORE fourac               
+         |                                            
+         |                                                    / Multiply by 4
+118 1172 |                  LOAD fourac                
+119 2174 |                  STORE mult_op1             
+11A 117A |                  LOAD const_four            
+11B 2175 |                  STORE mult_op2             
+11C 0136 |                  JNS multiply               
+11D 2172 |                  STORE fourac               
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Compute discriminant d = b^2 - 4ac 
+         |                                            / --------------------------- 
+11E 1171 |                  LOAD b_squared             
+11F 4172 |                  SUBT fourac                
+120 2173 |                  STORE discriminant         
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Determine number of real roots 
+         |                                            / --------------------------- 
+121 1173 |                  LOAD discriminant          
+122 8000 |                  SKIPCOND 000              / If d < 0
+123 9125 |                  JUMP check_zero            
+124 9128 |                  JUMP is_negative           
+         |                                            
+125 8400 |  check_zero      SKIPCOND 400              / If d == 0
+126 912E |                  JUMP is_positive          / If not zero, d > 0
+127 912B |                  JUMP is_zero               
+         |                                            
+128 117B |  is_negative     LOAD roots_0              / 0 real roots
+129 6000 |                  OUTPUT                     
+12A 9131 |                  JUMP next_case             
+         |                                            
+12B 117C |  is_zero         LOAD roots_1              / 1 real root
+12C 6000 |                  OUTPUT                     
+12D 9131 |                  JUMP next_case             
+         |                                            
+12E 117D |  is_positive     LOAD roots_2              / 2 real roots
+12F 6000 |                  OUTPUT                     
+130 9131 |                  JUMP next_case             
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Prepare next case 
+         |                                            / --------------------------- 
+131 116D |  next_case       LOAD num_cases             
+132 4179 |                  SUBT const_one             
+133 216D |                  STORE num_cases            
+134 9102 |                  JUMP case_loop             
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / End of program 
+         |                                            / --------------------------- 
+135 7000 |  end_program     HALT                       
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Subroutine: multiply (general version)
+         |                                            / --------------------------- 
+         |                                            
+136 0000 |  multiply        HEX 0                     / Return address
+         |                                                        
+137 A000 |                  CLEAR                      
+138 2176 |                  STORE mult_result          
+139 A000 |                  CLEAR                      
+13A 2178 |                  STORE neg_flag            / Sign flag (0 = +, 1 = -)
+         |                                            
+         |                                                    / --- Check signs
+         |                                            
+13B 1174 |  check_signs     LOAD mult_op1              
+13C 8800 |                  SKIPCOND 800              / If mult_op1 > 0
+13D 913F |                  JUMP check_second         / If mult_op1 < 0, handle negative case
+13E 914C |                  JUMP swap_operands        / If positive, proceed normally
+         |                                            
+13F 1175 |  check_second    LOAD mult_op2              
+140 8800 |                  SKIPCOND 800              / If mult_op2 > 0, go to core multiplication
+141 9144 |                  JUMP fix_sign             / If mult_op2 < 0, make positive
+142 015E |                  JNS mult_core              
+143 9154 |                  JUMP finalize_mult         
+         |                                            
+144 A000 |  fix_sign        CLEAR                      
+145 4175 |                  SUBT mult_op2             / mult_op2 = -mult_op2
+146 2175 |                  STORE mult_op2             
+147 1178 |                  LOAD neg_flag              
+148 3179 |                  ADD const_one              
+149 2178 |                  STORE neg_flag             
+14A 015E |                  JNS mult_core              
+14B 9154 |                  JUMP finalize_mult         
+         |                                            
+14C 1174 |  swap_operands   LOAD mult_op1             / Ensure second operand is positive
+14D 2177 |                  STORE temp                 
+14E 1175 |                  LOAD mult_op2              
+14F 2174 |                  STORE mult_op1             
+150 1177 |                  LOAD temp                  
+151 2175 |                  STORE mult_op2             
+152 015E |                  JNS mult_core              
+153 9154 |                  JUMP finalize_mult         
+         |                                            
+154 1178 |  finalize_mult   LOAD neg_flag              
+155 8400 |                  SKIPCOND 400              / If neg_flag == 0, result is already positive
+156 9158 |                  JUMP fix_result_sign      / Otherwise, make result positive
+157 915C |                  JUMP mult_end              
+         |                                            
+158 A000 |  fix_result_sign CLEAR                      
+159 4176 |                  SUBT mult_result          / mult_result = -mult_result
+15A 2176 |                  STORE mult_result          
+15B 915C |                  JUMP mult_end              
+         |                                            
+15C 1176 |  mult_end        LOAD mult_result           
+15D C136 |                  JUMPI multiply             
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Subroutine: mult_core (pure positive multiplication)
+         |                                            / --------------------------- 
+         |                                            
+15E 0000 |  mult_core       HEX 0                     / Return address
+         |                                                        
+15F A000 |                  CLEAR                      
+160 2176 |                  STORE mult_result          
+         |                                            
+161 1175 |  mult_loop       LOAD mult_op2              
+162 8400 |                  SKIPCOND 400              / If counter == 0, exit loop
+163 9165 |                  JUMP continue_mult         
+164 916C |                  JUMP end_mult_core         
+         |                                            
+165 1176 |  continue_mult   LOAD mult_result           
+166 3174 |                  ADD mult_op1               
+167 2176 |                  STORE mult_result          
+         |                                            
+168 1175 |                  LOAD mult_op2              
+169 4179 |                  SUBT const_one             
+16A 2175 |                  STORE mult_op2             
+16B 9161 |                  JUMP mult_loop             
+         |                                            
+16C C15E |  end_mult_core   JUMPI mult_core            
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Variables 
+         |                                            / --------------------------- 
+16D 0000 |  num_cases       DEC 0                      
+16E 0000 |  coef_a          DEC 0                      
+16F 0000 |  coef_b          DEC 0                      
+170 0000 |  coef_c          DEC 0                      
+171 0000 |  b_squared       DEC 0                      
+172 0000 |  fourac          DEC 0                      
+173 0000 |  discriminant    DEC 0                      
+         |                                            
+         |                                            / Multiplication helpers 
+174 0000 |  mult_op1        DEC 0                      
+175 0000 |  mult_op2        DEC 0                      
+176 0000 |  mult_result     DEC 0                      
+177 0000 |  temp            DEC 0                      
+178 0000 |  neg_flag        DEC 0                      
+         |                                            
+         |                                            / --------------------------- 
+         |                                            / Constants 
+         |                                            / --------------------------- 
+179 0001 |  const_one       DEC 1                      
+17A 0004 |  const_four      DEC 4                      
+17B 0000 |  roots_0         DEC 0                     / Number of real roots
+17C 0001 |  roots_1         DEC 1                      
+17D 0002 |  roots_2         DEC 2                      
+
+Assembly successful.
+
+         SYMBOL TABLE
+         -----------------------------------------------------------
+          Symbol          | Defined | References 
+         -----------------+---------+-------------------------------
+          b_squared       |   171   | 111, 11E
+          case_loop       |   102   | 134
+          check_second    |   13F   | 13D
+          check_signs     |   13B   | 
+          check_zero      |   125   | 123
+          coef_a          |   16E   | 107, 112
+          coef_b          |   16F   | 109, 10C, 10E
+          coef_c          |   170   | 10B, 114
+          const_four      |   17A   | 11A
+          const_one       |   179   | 132, 148, 169
+          continue_mult   |   165   | 163
+          discriminant    |   173   | 120, 121
+          end_mult_core   |   16C   | 164
+          end_program     |   135   | 105
+          finalize_mult   |   154   | 143, 14B, 153
+          fix_result_sign |   158   | 156
+          fix_sign        |   144   | 141
+          fourac          |   172   | 117, 118, 11D, 11F
+          is_negative     |   128   | 124
+          is_positive     |   12E   | 126
+          is_zero         |   12B   | 127
+          mult_core       |   15E   | 142, 14A, 152, 16C
+          mult_end        |   15C   | 157, 15B
+          mult_loop       |   161   | 16B
+          mult_op1        |   174   | 10D, 113, 119, 13B, 14C, 14F, 
+                          |         | 166
+          mult_op2        |   175   | 10F, 115, 11B, 13F, 145, 146, 
+                          |         | 14E, 151, 161, 168, 16A
+          mult_result     |   176   | 138, 159, 15A, 15C, 160, 165, 
+                          |         | 167
+          multiply        |   136   | 110, 116, 11C, 15D
+          neg_flag        |   178   | 13A, 147, 149, 154
+          next_case       |   131   | 12A, 12D, 130
+          num_cases       |   16D   | 101, 102, 131, 133
+          process_case    |   106   | 104
+          roots_0         |   17B   | 128
+          roots_1         |   17C   | 12B
+          roots_2         |   17D   | 12E
+          swap_operands   |   14C   | 13E
+          temp            |   177   | 14D, 150
+         -----------------------------------------------------------
+
+

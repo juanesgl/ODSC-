@@ -1,0 +1,219 @@
+     Assembly listing for: evaluar_cuadratica.mas
+                Assembled: Tue Oct 14 19:19:49 GMT-05:00 2025
+
+         |                                                / Evaluate a quadratic equation given all the coeficients 
+         |                                                / Author: Juan Esteban Sánchez García
+         |                                                
+         |                    ORG 100                     /Program start address
+         |                                                
+         |                                                            /Read the values for each coeficient 
+         |                                                
+100 5000 |                    INPUT                        
+101 215A |                    STORE x                      
+         |                                                
+102 5000 |                    INPUT                        
+103 2157 |                    STORE coef_a                 
+         |                                                
+104 5000 |                    INPUT                        
+105 2158 |                    STORE coef_b                 
+         |                                                
+106 5000 |                    INPUT                        
+107 2159 |                    STORE coef_c                 
+         |                                                
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Compute x^2 
+         |                                                / ---------------------------
+108 115A |                    LOAD x                       
+109 215F |                    STORE mult_op1               
+         |                                                
+10A 115A |                    LOAD x                       
+10B 2160 |                    STORE mult_op2               
+10C 0120 |                    JNS multiply                 
+10D 215B |                    STORE x_squared              
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Compute a*x^2 
+         |                                                / ---------------------------
+10E 1157 |                    LOAD coef_a                  
+10F 215F |                    STORE mult_op1               
+         |                                                
+110 115B |                    LOAD x_squared               
+111 2160 |                    STORE mult_op2               
+112 0120 |                    JNS multiply                 
+113 215C |                    STORE a_times_x_squared      
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Compute b*x  
+         |                                                / ---------------------------
+         |                                                
+114 1158 |                    LOAD coef_b                  
+115 215F |                    STORE mult_op1               
+         |                                                
+116 115A |                    LOAD x                       
+117 2160 |                    STORE mult_op2               
+118 0120 |                    JNS multiply                 
+119 215D |                    STORE b_times_x              
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Compute a*x^2 + b*x + c  
+         |                                                / ---------------------------
+         |                                                
+11A 115C |                    LOAD a_times_x_squared       
+11B 315D |                    ADD b_times_x                
+11C 3159 |                    ADD coef_c                   
+11D 215E |                    STORE result                 
+11E 6000 |                    OUTPUT                       
+         |                                                
+         |                                                
+11F 7000 |                    HALT                         
+         |                                                
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Subroutine: multiply (general version)
+         |                                                / --------------------------- 
+         |                                                
+120 0000 |  multiply          HEX 0                       / Return address
+         |                                                            
+121 A000 |                    CLEAR                        
+122 2161 |                    STORE mult_result            
+123 A000 |                    CLEAR                        
+124 2163 |                    STORE neg_flag              / Sign flag (0 = +, 1 = -)
+         |                                                
+         |                                                        / --- Check signs
+         |                                                
+125 115F |  check_signs       LOAD mult_op1                
+126 8800 |                    SKIPCOND 800                / If mult_op1 > 0
+127 9129 |                    JUMP check_second           / If mult_op1 < 0, handle negative case
+128 9136 |                    JUMP swap_operands          / If positive, proceed normally
+         |                                                
+129 1160 |  check_second      LOAD mult_op2                
+12A 8800 |                    SKIPCOND 800                / If mult_op2 > 0, go to core multiplication
+12B 912E |                    JUMP fix_sign               / If mult_op2 < 0, make positive
+12C 0148 |                    JNS mult_core                
+12D 913E |                    JUMP finalize_mult           
+         |                                                
+12E A000 |  fix_sign          CLEAR                        
+12F 4160 |                    SUBT mult_op2               / mult_op2 = -mult_op2
+130 2160 |                    STORE mult_op2               
+131 1163 |                    LOAD neg_flag                
+132 3164 |                    ADD const_one                
+133 2163 |                    STORE neg_flag               
+134 0148 |                    JNS mult_core                
+135 913E |                    JUMP finalize_mult           
+         |                                                
+136 115F |  swap_operands     LOAD mult_op1               / Ensure second operand is positive
+137 2162 |                    STORE temp                   
+138 1160 |                    LOAD mult_op2                
+139 215F |                    STORE mult_op1               
+13A 1162 |                    LOAD temp                    
+13B 2160 |                    STORE mult_op2               
+13C 0148 |                    JNS mult_core                
+13D 913E |                    JUMP finalize_mult           
+         |                                                
+13E 1163 |  finalize_mult     LOAD neg_flag                
+13F 8400 |                    SKIPCOND 400                / If neg_flag == 0, result is already positive
+140 9142 |                    JUMP fix_result_sign        / Otherwise, make result positive
+141 9146 |                    JUMP mult_end                
+         |                                                
+142 A000 |  fix_result_sign   CLEAR                        
+143 4161 |                    SUBT mult_result            / mult_result = -mult_result
+144 2161 |                    STORE mult_result            
+145 9146 |                    JUMP mult_end                
+         |                                                
+146 1161 |  mult_end          LOAD mult_result             
+147 C120 |                    JUMPI multiply               
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Subroutine: mult_core (pure positive multiplication)
+         |                                                / --------------------------- 
+         |                                                
+148 0000 |  mult_core         HEX 0                       / Return address
+         |                                                            
+149 A000 |                    CLEAR                        
+14A 2161 |                    STORE mult_result            
+         |                                                
+14B 1160 |  mult_loop         LOAD mult_op2                
+14C 8400 |                    SKIPCOND 400                / If counter == 0, exit loop
+14D 914F |                    JUMP continue_mult           
+14E 9156 |                    JUMP end_mult_core           
+         |                                                
+14F 1161 |  continue_mult     LOAD mult_result             
+150 315F |                    ADD mult_op1                 
+151 2161 |                    STORE mult_result            
+         |                                                
+152 1160 |                    LOAD mult_op2                
+153 4164 |                    SUBT const_one               
+154 2160 |                    STORE mult_op2               
+155 914B |                    JUMP mult_loop               
+         |                                                
+156 C148 |  end_mult_core     JUMPI mult_core              
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Variables 
+         |                                                / --------------------------- 
+         |                                                
+157 0000 |  coef_a            DEC 0                       / Coefficient a
+158 0000 |  coef_b            DEC 0                       / Coefficient b
+159 0000 |  coef_c            DEC 0                       / Coefficient c
+15A 0000 |  x                 DEC 0                       / Value of x
+         |                                                
+15B 0000 |  x_squared         DEC 0                       / x^2
+15C 0000 |  a_times_x_squared DEC 0                       / a*x^2
+15D 0000 |  b_times_x         DEC 0                       / b*x
+15E 0000 |  result            DEC 0                       / Final result of a*x^2 + b*x + c
+         |                                                
+         |                                                / Multiplication helper variables
+15F 0000 |  mult_op1          DEC 0                        
+160 0000 |  mult_op2          DEC 0                        
+161 0000 |  mult_result       DEC 0                        
+162 0000 |  temp              DEC 0                        
+163 0000 |  neg_flag          DEC 0                        
+         |                                                
+         |                                                / --------------------------- 
+         |                                                / Constants 
+         |                                                / --------------------------- 
+         |                                                
+164 0001 |  const_one         DEC 1                        
+         |                                                
+         |                                                
+         |                                                
+
+Assembly successful.
+
+         SYMBOL TABLE
+         -------------------------------------------------------------
+          Symbol            | Defined | References 
+         -------------------+---------+-------------------------------
+          a_times_x_squared |   15C   | 113, 11A
+          b_times_x         |   15D   | 119, 11B
+          check_second      |   129   | 127
+          check_signs       |   125   | 
+          coef_a            |   157   | 103, 10E
+          coef_b            |   158   | 105, 114
+          coef_c            |   159   | 107, 11C
+          const_one         |   164   | 132, 153
+          continue_mult     |   14F   | 14D
+          end_mult_core     |   156   | 14E
+          finalize_mult     |   13E   | 12D, 135, 13D
+          fix_result_sign   |   142   | 140
+          fix_sign          |   12E   | 12B
+          mult_core         |   148   | 12C, 134, 13C, 156
+          mult_end          |   146   | 141, 145
+          mult_loop         |   14B   | 155
+          mult_op1          |   15F   | 109, 10F, 115, 125, 136, 139, 
+                            |         | 150
+          mult_op2          |   160   | 10B, 111, 117, 129, 12F, 130, 
+                            |         | 138, 13B, 14B, 152, 154
+          mult_result       |   161   | 122, 143, 144, 146, 14A, 14F, 
+                            |         | 151
+          multiply          |   120   | 10C, 112, 118, 147
+          neg_flag          |   163   | 124, 131, 133, 13E
+          result            |   15E   | 11D
+          swap_operands     |   136   | 128
+          temp              |   162   | 137, 13A
+          x                 |   15A   | 101, 108, 10A, 116
+          x_squared         |   15B   | 10D, 110
+         -------------------------------------------------------------
+
+

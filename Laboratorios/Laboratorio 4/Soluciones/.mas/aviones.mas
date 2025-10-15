@@ -1,0 +1,263 @@
+/ MARIE Assembly Program - Lab2B
+/ Author: Juan Esteban Sánchez García
+
+
+/ --------------------------- 
+/ Program start 
+/ --------------------------- 
+
+        ORG 100
+
+        INPUT           
+        STORE num_cases         / Read number of test cases
+
+        loop_cases, LOAD num_cases
+        SKIPCOND 400            / If num_cases == 0, finish
+        JUMP process_case
+        JUMP end_program
+
+
+/ --------------------------- 
+/ Read 5 numbers and compute MCD 
+/ --------------------------- 
+        process_case, INPUT      
+        STORE a
+        INPUT 
+        STORE b
+        INPUT 
+        STORE c
+        INPUT 
+        STORE d
+        INPUT 
+        STORE e
+
+        JUMP mcd5               / Compute GCD of the 5 numbers
+
+
+/ --------------------------- 
+/ Print results 
+/ --------------------------- 
+        print_results, LOAD res_mcd5
+        OUTPUT
+
+        LOAD quot_a
+        OUTPUT
+        LOAD quot_b
+        OUTPUT
+        LOAD quot_c
+        OUTPUT
+        LOAD quot_d
+        OUTPUT
+        LOAD quot_e
+        OUTPUT
+
+        LOAD sum_quotients
+        OUTPUT
+
+        LOAD num_cases
+        SUBT one
+        STORE num_cases
+        JUMP loop_cases
+
+
+/ --------------------------- 
+/ End of program 
+/ --------------------------- 
+        end_program, HALT
+
+
+/ ==========================================================
+/ Subroutine: MCD of 5 numbers (using Euclid’s algorithm)
+/ ==========================================================
+mcd5,   LOAD a
+        STORE mcd_v1
+        LOAD b
+        STORE mcd_v2
+        JNS mcd
+        LOAD res_mcd
+        STORE res_mcd5
+
+        LOAD c
+        STORE mcd_v2
+        LOAD res_mcd5
+        STORE mcd_v1
+        JNS mcd
+        LOAD res_mcd
+        STORE res_mcd5
+
+        LOAD d
+        STORE mcd_v2
+        LOAD res_mcd5
+        STORE mcd_v1
+        JNS mcd
+        LOAD res_mcd
+        STORE res_mcd5
+
+        LOAD e
+        STORE mcd_v2
+        LOAD res_mcd5
+        STORE mcd_v1
+        JNS mcd
+        LOAD res_mcd
+        STORE res_mcd5
+
+
+/ Compute quotient for each and sum
+        CLEAR
+        STORE sum_quotients
+
+        / a / gcd
+        LOAD a
+        STORE dividend
+        LOAD res_mcd5
+        STORE divisor
+        JNS divide
+        LOAD quotient
+        STORE quot_a
+        ADD sum_quotients
+        STORE sum_quotients
+
+        / b / gcd
+        LOAD b
+        STORE dividend
+        LOAD res_mcd5
+        STORE divisor
+        JNS divide
+        LOAD quotient
+        STORE quot_b
+        ADD sum_quotients
+        STORE sum_quotients
+
+        / c / gcd
+        LOAD c
+        STORE dividend
+        LOAD res_mcd5
+        STORE divisor
+        JNS divide
+        LOAD quotient
+        STORE quot_c
+        ADD sum_quotients
+        STORE sum_quotients
+
+        / d / gcd
+        LOAD d
+        STORE dividend
+        LOAD res_mcd5
+        STORE divisor
+        JNS divide
+        LOAD quotient
+        STORE quot_d
+        ADD sum_quotients
+        STORE sum_quotients
+
+        / e / gcd
+        LOAD e
+        STORE dividend
+        LOAD res_mcd5
+        STORE divisor
+        JNS divide
+        LOAD quotient
+        STORE quot_e
+        ADD sum_quotients
+        STORE sum_quotients
+
+        JUMP print_results
+
+
+/ ==========================================================
+/ Subroutine: GCD (Euclid’s algorithm)
+/ ==========================================================
+mcd,    HEX 0
+
+        LOAD mcd_v1
+        SUBT mcd_v2
+        SKIPCOND 000
+        JUMP no_swap
+
+        LOAD mcd_v2
+        STORE temp
+        LOAD mcd_v1
+        STORE mcd_v2
+        LOAD temp
+        STORE mcd_v1
+
+no_swap,    JUMP start_mcd
+
+start_mcd,  LOAD mcd_v1
+            STORE dividend
+            LOAD mcd_v2
+            STORE divisor
+            JNS divide
+
+            LOAD remainder
+            SKIPCOND 400
+            JUMP loop_mcd
+            JUMP end_mcd
+
+loop_mcd,   LOAD mcd_v2
+            STORE mcd_v1
+            LOAD remainder
+            STORE mcd_v2
+            JUMP start_mcd
+
+end_mcd,    LOAD mcd_v2
+            STORE res_mcd
+            JUMPI mcd
+
+
+/ ==========================================================
+/ Subroutine: Division (positive integers only)
+/ ==========================================================
+divide, HEX 0
+
+        CLEAR
+        STORE quotient
+
+div_check,  LOAD dividend
+            SUBT divisor
+            SKIPCOND 000
+            JUMP div_loop
+            JUMP div_end
+
+div_loop,   STORE dividend
+            LOAD quotient
+            ADD one
+            STORE quotient
+            JUMP div_check
+
+div_end,    LOAD dividend
+            STORE remainder
+            JUMPI divide
+
+
+/ ==========================================================
+/ Variables
+/ ==========================================================
+num_cases,      DEC 0
+a,              DEC 0
+b,              DEC 0
+c,              DEC 0
+d,              DEC 0
+e,              DEC 0
+
+quot_a,         DEC 0
+quot_b,         DEC 0
+quot_c,         DEC 0
+quot_d,         DEC 0
+quot_e,         DEC 0
+
+sum_quotients,  DEC 0
+
+res_mcd,        DEC 0
+res_mcd5,       DEC 0
+temp,           DEC 0
+mcd_v1,         DEC 0
+mcd_v2,         DEC 0
+
+dividend,       DEC 0
+divisor,        DEC 0
+quotient,       DEC 0
+remainder,      DEC 0
+
+one,            DEC 1
+

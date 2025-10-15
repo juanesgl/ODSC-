@@ -1,0 +1,176 @@
+/ Evaluate a quadratic equation given all the coeficients 
+/ Author: Juan Esteban Sánchez García
+
+            ORG 100 /Program start address
+
+            /Read the values for each coeficient 
+
+            INPUT 
+            STORE x
+
+            INPUT 
+            STORE coef_a
+
+            INPUT 
+            STORE coef_b
+
+            INPUT 
+            STORE coef_c
+
+/ --------------------------- 
+/ Compute x^2 
+/ ---------------------------
+            LOAD x 
+            STORE mult_op1 
+
+            LOAD x 
+            STORE mult_op2
+            JNS multiply
+            STORE x_squared
+
+/ --------------------------- 
+/ Compute a*x^2 
+/ ---------------------------
+            LOAD coef_a 
+            STORE mult_op1
+
+            LOAD x_squared
+            STORE mult_op2
+            JNS multiply
+            STORE a_times_x_squared 
+
+/ --------------------------- 
+/ Compute b*x  
+/ ---------------------------
+
+            LOAD coef_b
+            STORE mult_op1
+
+            LOAD x 
+            STORE mult_op2
+            JNS multiply
+            STORE b_times_x 
+
+/ --------------------------- 
+/ Compute a*x^2 + b*x + c  
+/ ---------------------------
+
+            LOAD a_times_x_squared
+            ADD b_times_x
+            ADD coef_c 
+            STORE result 
+            OUTPUT  
+
+
+            HALT  
+
+
+/ --------------------------- 
+/ Subroutine: multiply (general version)
+/ --------------------------- 
+
+multiply,   HEX 0                / Return address
+            
+            CLEAR
+            STORE mult_result
+            CLEAR
+            STORE neg_flag        / Sign flag (0 = +, 1 = -)
+
+        / --- Check signs
+
+check_signs, LOAD mult_op1
+            SKIPCOND 800          / If mult_op1 > 0
+            JUMP check_second     / If mult_op1 < 0, handle negative case
+            JUMP swap_operands    / If positive, proceed normally
+
+check_second, LOAD mult_op2 
+            SKIPCOND 800          / If mult_op2 > 0, go to core multiplication
+            JUMP fix_sign         / If mult_op2 < 0, make positive
+            JNS mult_core
+            JUMP finalize_mult
+
+fix_sign,   CLEAR
+            SUBT mult_op2         / mult_op2 = -mult_op2
+            STORE mult_op2
+            LOAD neg_flag
+            ADD const_one 
+            STORE neg_flag
+            JNS mult_core
+            JUMP finalize_mult
+
+swap_operands, LOAD mult_op1     / Ensure second operand is positive
+            STORE temp
+            LOAD mult_op2
+            STORE mult_op1
+            LOAD temp
+            STORE mult_op2
+            JNS mult_core
+            JUMP finalize_mult
+
+finalize_mult, LOAD neg_flag
+            SKIPCOND 400          / If neg_flag == 0, result is already positive
+            JUMP fix_result_sign  / Otherwise, make result positive
+            JUMP mult_end
+
+fix_result_sign, CLEAR
+            SUBT mult_result      / mult_result = -mult_result
+            STORE mult_result
+            JUMP mult_end
+
+mult_end,   LOAD mult_result
+            JUMPI multiply
+
+/ --------------------------- 
+/ Subroutine: mult_core (pure positive multiplication)
+/ --------------------------- 
+
+mult_core,  HEX 0                / Return address
+            
+            CLEAR
+            STORE mult_result
+
+mult_loop,  LOAD mult_op2
+            SKIPCOND 400          / If counter == 0, exit loop
+            JUMP continue_mult
+            JUMP end_mult_core
+
+continue_mult, LOAD mult_result
+            ADD mult_op1
+            STORE mult_result
+
+            LOAD mult_op2
+            SUBT const_one
+            STORE mult_op2
+            JUMP mult_loop
+
+end_mult_core, JUMPI mult_core
+
+/ --------------------------- 
+/ Variables 
+/ --------------------------- 
+
+coef_a,             DEC 0       / Coefficient a
+coef_b,             DEC 0       / Coefficient b
+coef_c,             DEC 0       / Coefficient c
+x,                  DEC 0       / Value of x
+
+x_squared,          DEC 0       / x^2
+a_times_x_squared,  DEC 0       / a*x^2
+b_times_x,          DEC 0       / b*x
+result,             DEC 0       / Final result of a*x^2 + b*x + c
+
+/ Multiplication helper variables
+mult_op1,           DEC 0
+mult_op2,           DEC 0
+mult_result,        DEC 0
+temp,               DEC 0
+neg_flag,           DEC 0
+
+/ --------------------------- 
+/ Constants 
+/ --------------------------- 
+
+const_one,          DEC 1
+
+
+

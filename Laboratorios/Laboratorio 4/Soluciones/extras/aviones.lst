@@ -1,0 +1,321 @@
+     Assembly listing for: aviones.mas
+                Assembled: Tue Oct 14 19:51:27 GMT-05:00 2025
+
+         |                                        / MARIE Assembly Program - Lab2B
+         |                                        / Author: Juan Esteban Sánchez García
+         |                                        
+         |                                        
+         |                                        / --------------------------- 
+         |                                        / Program start 
+         |                                        / --------------------------- 
+         |                                        
+         |                ORG 100                  
+         |                                        
+100 5000 |                INPUT                    
+101 219D |                STORE num_cases         / Read number of test cases
+         |                                        
+102 119D |  loop_cases    LOAD num_cases           
+103 8400 |                SKIPCOND 400            / If num_cases == 0, finish
+104 9106 |                JUMP process_case        
+105 9123 |                JUMP end_program         
+         |                                        
+         |                                        
+         |                                        / --------------------------- 
+         |                                        / Read 5 numbers and compute MCD 
+         |                                        / --------------------------- 
+106 5000 |  process_case  INPUT                    
+107 219E |                STORE a                  
+108 5000 |                INPUT                    
+109 219F |                STORE b                  
+10A 5000 |                INPUT                    
+10B 21A0 |                STORE c                  
+10C 5000 |                INPUT                    
+10D 21A1 |                STORE d                  
+10E 5000 |                INPUT                    
+10F 21A2 |                STORE e                  
+         |                                        
+110 9124 |                JUMP mcd5               / Compute GCD of the 5 numbers
+         |                                        
+         |                                        
+         |                                        / --------------------------- 
+         |                                        / Print results 
+         |                                        / --------------------------- 
+111 11AA |  print_results LOAD res_mcd5            
+112 6000 |                OUTPUT                   
+         |                                        
+113 11A3 |                LOAD quot_a              
+114 6000 |                OUTPUT                   
+115 11A4 |                LOAD quot_b              
+116 6000 |                OUTPUT                   
+117 11A5 |                LOAD quot_c              
+118 6000 |                OUTPUT                   
+119 11A6 |                LOAD quot_d              
+11A 6000 |                OUTPUT                   
+11B 11A7 |                LOAD quot_e              
+11C 6000 |                OUTPUT                   
+         |                                        
+11D 11A8 |                LOAD sum_quotients       
+11E 6000 |                OUTPUT                   
+         |                                        
+11F 119D |                LOAD num_cases           
+120 41B2 |                SUBT one                 
+121 219D |                STORE num_cases          
+122 9102 |                JUMP loop_cases          
+         |                                        
+         |                                        
+         |                                        / --------------------------- 
+         |                                        / End of program 
+         |                                        / --------------------------- 
+123 7000 |  end_program   HALT                     
+         |                                        
+         |                                        
+         |                                        / ==========================================================
+         |                                        / Subroutine: MCD of 5 numbers (using Euclid’s algorithm)
+         |                                        / ==========================================================
+124 119E |  mcd5          LOAD a                   
+125 21AC |                STORE mcd_v1             
+126 119F |                LOAD b                   
+127 21AD |                STORE mcd_v2             
+128 0170 |                JNS mcd                  
+129 11A9 |                LOAD res_mcd             
+12A 21AA |                STORE res_mcd5           
+         |                                        
+12B 11A0 |                LOAD c                   
+12C 21AD |                STORE mcd_v2             
+12D 11AA |                LOAD res_mcd5            
+12E 21AC |                STORE mcd_v1             
+12F 0170 |                JNS mcd                  
+130 11A9 |                LOAD res_mcd             
+131 21AA |                STORE res_mcd5           
+         |                                        
+132 11A1 |                LOAD d                   
+133 21AD |                STORE mcd_v2             
+134 11AA |                LOAD res_mcd5            
+135 21AC |                STORE mcd_v1             
+136 0170 |                JNS mcd                  
+137 11A9 |                LOAD res_mcd             
+138 21AA |                STORE res_mcd5           
+         |                                        
+139 11A2 |                LOAD e                   
+13A 21AD |                STORE mcd_v2             
+13B 11AA |                LOAD res_mcd5            
+13C 21AC |                STORE mcd_v1             
+13D 0170 |                JNS mcd                  
+13E 11A9 |                LOAD res_mcd             
+13F 21AA |                STORE res_mcd5           
+         |                                        
+         |                                        
+         |                                        / Compute quotient for each and sum
+140 A000 |                CLEAR                    
+141 21A8 |                STORE sum_quotients      
+         |                                        
+         |                                                / a / gcd
+142 119E |                LOAD a                   
+143 21AE |                STORE dividend           
+144 11AA |                LOAD res_mcd5            
+145 21AF |                STORE divisor            
+146 018D |                JNS divide               
+147 11B0 |                LOAD quotient            
+148 21A3 |                STORE quot_a             
+149 31A8 |                ADD sum_quotients        
+14A 21A8 |                STORE sum_quotients      
+         |                                        
+         |                                                / b / gcd
+14B 119F |                LOAD b                   
+14C 21AE |                STORE dividend           
+14D 11AA |                LOAD res_mcd5            
+14E 21AF |                STORE divisor            
+14F 018D |                JNS divide               
+150 11B0 |                LOAD quotient            
+151 21A4 |                STORE quot_b             
+152 31A8 |                ADD sum_quotients        
+153 21A8 |                STORE sum_quotients      
+         |                                        
+         |                                                / c / gcd
+154 11A0 |                LOAD c                   
+155 21AE |                STORE dividend           
+156 11AA |                LOAD res_mcd5            
+157 21AF |                STORE divisor            
+158 018D |                JNS divide               
+159 11B0 |                LOAD quotient            
+15A 21A5 |                STORE quot_c             
+15B 31A8 |                ADD sum_quotients        
+15C 21A8 |                STORE sum_quotients      
+         |                                        
+         |                                                / d / gcd
+15D 11A1 |                LOAD d                   
+15E 21AE |                STORE dividend           
+15F 11AA |                LOAD res_mcd5            
+160 21AF |                STORE divisor            
+161 018D |                JNS divide               
+162 11B0 |                LOAD quotient            
+163 21A6 |                STORE quot_d             
+164 31A8 |                ADD sum_quotients        
+165 21A8 |                STORE sum_quotients      
+         |                                        
+         |                                                / e / gcd
+166 11A2 |                LOAD e                   
+167 21AE |                STORE dividend           
+168 11AA |                LOAD res_mcd5            
+169 21AF |                STORE divisor            
+16A 018D |                JNS divide               
+16B 11B0 |                LOAD quotient            
+16C 21A7 |                STORE quot_e             
+16D 31A8 |                ADD sum_quotients        
+16E 21A8 |                STORE sum_quotients      
+         |                                        
+16F 9111 |                JUMP print_results       
+         |                                        
+         |                                        
+         |                                        / ==========================================================
+         |                                        / Subroutine: GCD (Euclid’s algorithm)
+         |                                        / ==========================================================
+170 0000 |  mcd           HEX 0                    
+         |                                        
+171 11AC |                LOAD mcd_v1              
+172 41AD |                SUBT mcd_v2              
+173 8000 |                SKIPCOND 000             
+174 917B |                JUMP no_swap             
+         |                                        
+175 11AD |                LOAD mcd_v2              
+176 21AB |                STORE temp               
+177 11AC |                LOAD mcd_v1              
+178 21AD |                STORE mcd_v2             
+179 11AB |                LOAD temp                
+17A 21AC |                STORE mcd_v1             
+         |                                        
+17B 917C |  no_swap       JUMP start_mcd           
+         |                                        
+17C 11AC |  start_mcd     LOAD mcd_v1              
+17D 21AE |                STORE dividend           
+17E 11AD |                LOAD mcd_v2              
+17F 21AF |                STORE divisor            
+180 018D |                JNS divide               
+         |                                        
+181 11B1 |                LOAD remainder           
+182 8400 |                SKIPCOND 400             
+183 9185 |                JUMP loop_mcd            
+184 918A |                JUMP end_mcd             
+         |                                        
+185 11AD |  loop_mcd      LOAD mcd_v2              
+186 21AC |                STORE mcd_v1             
+187 11B1 |                LOAD remainder           
+188 21AD |                STORE mcd_v2             
+189 917C |                JUMP start_mcd           
+         |                                        
+18A 11AD |  end_mcd       LOAD mcd_v2              
+18B 21A9 |                STORE res_mcd            
+18C C170 |                JUMPI mcd                
+         |                                        
+         |                                        
+         |                                        / ==========================================================
+         |                                        / Subroutine: Division (positive integers only)
+         |                                        / ==========================================================
+18D 0000 |  divide        HEX 0                    
+         |                                        
+18E A000 |                CLEAR                    
+18F 21B0 |                STORE quotient           
+         |                                        
+190 11AE |  div_check     LOAD dividend            
+191 41AF |                SUBT divisor             
+192 8000 |                SKIPCOND 000             
+193 9195 |                JUMP div_loop            
+194 919A |                JUMP div_end             
+         |                                        
+195 21AE |  div_loop      STORE dividend           
+196 11B0 |                LOAD quotient            
+197 31B2 |                ADD one                  
+198 21B0 |                STORE quotient           
+199 9190 |                JUMP div_check           
+         |                                        
+19A 11AE |  div_end       LOAD dividend            
+19B 21B1 |                STORE remainder          
+19C C18D |                JUMPI divide             
+         |                                        
+         |                                        
+         |                                        / ==========================================================
+         |                                        / Variables
+         |                                        / ==========================================================
+19D 0000 |  num_cases     DEC 0                    
+19E 0000 |  a             DEC 0                    
+19F 0000 |  b             DEC 0                    
+1A0 0000 |  c             DEC 0                    
+1A1 0000 |  d             DEC 0                    
+1A2 0000 |  e             DEC 0                    
+         |                                        
+1A3 0000 |  quot_a        DEC 0                    
+1A4 0000 |  quot_b        DEC 0                    
+1A5 0000 |  quot_c        DEC 0                    
+1A6 0000 |  quot_d        DEC 0                    
+1A7 0000 |  quot_e        DEC 0                    
+         |                                        
+1A8 0000 |  sum_quotients DEC 0                    
+         |                                        
+1A9 0000 |  res_mcd       DEC 0                    
+1AA 0000 |  res_mcd5      DEC 0                    
+1AB 0000 |  temp          DEC 0                    
+1AC 0000 |  mcd_v1        DEC 0                    
+1AD 0000 |  mcd_v2        DEC 0                    
+         |                                        
+1AE 0000 |  dividend      DEC 0                    
+1AF 0000 |  divisor       DEC 0                    
+1B0 0000 |  quotient      DEC 0                    
+1B1 0000 |  remainder     DEC 0                    
+         |                                        
+1B2 0001 |  one           DEC 1                    
+         |                                        
+
+Assembly successful.
+
+         SYMBOL TABLE
+         ---------------------------------------------------------
+          Symbol        | Defined | References 
+         ---------------+---------+-------------------------------
+          a             |   19E   | 107, 124, 142
+          b             |   19F   | 109, 126, 14B
+          c             |   1A0   | 10B, 12B, 154
+          d             |   1A1   | 10D, 132, 15D
+          div_check     |   190   | 199
+          div_end       |   19A   | 194
+          div_loop      |   195   | 193
+          divide        |   18D   | 146, 14F, 158, 161, 16A, 180, 
+                        |         | 19C
+          dividend      |   1AE   | 143, 14C, 155, 15E, 167, 17D, 
+                        |         | 190, 195, 19A
+          divisor       |   1AF   | 145, 14E, 157, 160, 169, 17F, 
+                        |         | 191
+          e             |   1A2   | 10F, 139, 166
+          end_mcd       |   18A   | 184
+          end_program   |   123   | 105
+          loop_cases    |   102   | 122
+          loop_mcd      |   185   | 183
+          mcd           |   170   | 128, 12F, 136, 13D, 18C
+          mcd5          |   124   | 110
+          mcd_v1        |   1AC   | 125, 12E, 135, 13C, 171, 177, 
+                        |         | 17A, 17C, 186
+          mcd_v2        |   1AD   | 127, 12C, 133, 13A, 172, 175, 
+                        |         | 178, 17E, 185, 188, 18A
+          no_swap       |   17B   | 174
+          num_cases     |   19D   | 101, 102, 11F, 121
+          one           |   1B2   | 120, 197
+          print_results |   111   | 16F
+          process_case  |   106   | 104
+          quot_a        |   1A3   | 113, 148
+          quot_b        |   1A4   | 115, 151
+          quot_c        |   1A5   | 117, 15A
+          quot_d        |   1A6   | 119, 163
+          quot_e        |   1A7   | 11B, 16C
+          quotient      |   1B0   | 147, 150, 159, 162, 16B, 18F, 
+                        |         | 196, 198
+          remainder     |   1B1   | 181, 187, 19B
+          res_mcd       |   1A9   | 129, 130, 137, 13E, 18B
+          res_mcd5      |   1AA   | 111, 12A, 12D, 131, 134, 138, 
+                        |         | 13B, 13F, 144, 14D, 156, 15F, 
+                        |         | 168
+          start_mcd     |   17C   | 17B, 189
+          sum_quotients |   1A8   | 11D, 141, 149, 14A, 152, 153, 
+                        |         | 15B, 15C, 164, 165, 16D, 16E
+          temp          |   1AB   | 176, 179
+         ---------------------------------------------------------
+
+

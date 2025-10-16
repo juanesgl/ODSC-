@@ -1,0 +1,225 @@
+/ MARIE Assembly Program - Lab2C
+/ Author: Juan Esteban Sánchez García
+
+
+            ORG 100
+
+/ ---------------------------
+/ Read number of test cases
+/ ---------------------------
+    Input
+    Store cases
+
+/ ---------------------------
+/ Main loop: process each case
+/ ---------------------------
+loop_cases, Load cases
+    Skipcond 400            / If cases == 0, go to end
+    Jump process_case
+    Jump end_program
+
+/ ---------------------------
+/ Read inputs a and b, call egypt subroutine
+/ ---------------------------
+process_case, Input
+    Store a
+    Input
+    Store b
+    JnS egypt               / Egyptian decomposition
+
+    / Print 0 to mark the end of this case
+    Load zero
+    Output
+
+    / Decrement remaining cases
+    Load cases
+    Subt one
+    Store cases
+    Jump loop_cases
+
+/ ---------------------------
+/ End of program
+/ ---------------------------
+end_program, Halt
+
+
+/ =====================================================
+/ Subroutine: Egyptian Fraction Decomposition (egypt)
+/ =====================================================
+egypt,      HEX 0
+begin_egypt, Load a
+    Skipcond 400            / If a == 0, check b
+    Jump b_equal_0
+    Jump end_egypt
+
+b_equal_0, Load b
+    Skipcond 400            / If b == 0, skip next
+    Jump if_1
+    Jump end_egypt
+
+/ Case 1: If b divides a exactly
+if_1,   Load zero
+    Store div_times
+    Store div_mod
+    Load b
+    Store div_a
+    Load a
+    Store div_b
+    JnS div
+    Store c
+    Load c
+    Skipcond 400            / If remainder == 0
+    Jump if_2
+    Load div_times
+    Output
+    Jump end_egypt
+
+/ Case 2: If a divides b exactly
+if_2,   Load zero
+    Store div_times
+    Store div_mod
+    Load a
+    Store div_a
+    Load b
+    Store div_b
+    JnS div
+    Store c
+    Load c
+    Skipcond 400
+    Jump if_3
+    Load div_times
+    Output
+    Jump end_egypt
+
+/ Case 3: General recursive step
+if_3,   Load a
+    Subt b
+    Skipcond 800            / If a >= b
+    Jump egypt_else
+    Load zero
+    Store div_times
+    Store div_mod
+    Load a
+    Store div_a
+    Load b
+    Store div_b
+    JnS div
+    Store a
+    Load div_times
+    Output
+    Jump begin_egypt
+
+/ Case 4: a < b
+egypt_else, Load zero
+    Store div_times
+    Store div_mod
+    Store mult_acum
+    Load b
+    Store div_a
+    Load a
+    Store div_b
+    JnS div
+    Load div_times
+    Add one
+    Store n
+    Output
+
+    / a = a * n - b
+    Load a
+    Store mult_a
+    Load n
+    Store mult_b
+    JnS mult
+    Subt b
+    Store a
+
+    / b = b * n
+    Load zero
+    Store mult_acum
+    Load b
+    Store mult_a
+    Load n
+    Store mult_b
+    JnS mult
+    Store b
+
+    Jump begin_egypt
+
+end_egypt, JumpI egypt
+
+
+/ =====================================================
+/ Subroutine: Integer Division (div)
+/ Description: div_a / div_b = quotient (div_times),
+/ remainder (div_mod)
+/ =====================================================
+div,    HEX 0
+loop_div, Load div_a
+    Skipcond 800
+    Jump fix_div
+    Load div_a
+    Subt div_b
+    Store div_a
+    Load div_times
+    Add one
+    Store div_times
+    Jump loop_div
+
+fix_div, Load div_a
+    Skipcond 000
+    Jump end_div
+    Load div_times
+    Subt one
+    Store div_times
+    Load div_a
+    Add div_b
+    Store div_mod
+    Jump end_div
+
+end_div, Load div_mod
+    JumpI div
+
+
+/ =====================================================
+/ Subroutine: Multiplication (mult)
+/ Description: mult_a * mult_b = mult_acum
+/ =====================================================
+mult,   HEX 0
+loop_mult, Load mult_a
+    Skipcond 800
+    Jump end_mult
+    Load mult_acum
+    Add mult_b
+    Store mult_acum
+    Load mult_a
+    Subt one
+    Store mult_a
+    Jump loop_mult
+
+end_mult, Load mult_acum
+    JumpI mult
+
+
+/ =====================================================
+/ Variables
+/ =====================================================
+cases,      DEC 0       / Number of test cases
+a,          DEC 0       / Numerator
+b,          DEC 0       / Denominator
+c,          DEC 0       / Remainder holder
+n,          DEC 0       / Multiplier in Egyptian step
+
+mult_a,     DEC 0       / Operand A for multiplication
+mult_b,     DEC 0       / Operand B for multiplication
+mult_acum,  DEC 0       / Accumulator for product
+
+div_a,      DEC 0       / Dividend
+div_b,      DEC 0       / Divisor
+div_times,  DEC 0       / Quotient
+div_mod,    DEC 0       / Remainder
+
+one,        DEC 1
+zero,       DEC 0
+
+            END
+

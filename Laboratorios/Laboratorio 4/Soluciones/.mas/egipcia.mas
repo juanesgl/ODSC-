@@ -1,225 +1,221 @@
-/ MARIE Assembly Program - Lab2C
-/ Author: Juan Esteban Sánchez García
-
+/ MARIE ASSEMBLY PROGRAM - LAB2C
+/ AUTHOR: JUAN ESTEBAN SÁNCHEZ GARCÍA
+/ EGYPTIAN FRACTION DECOMPOSITION
 
             ORG 100
 
-/ ---------------------------
-/ Read number of test cases
-/ ---------------------------
-    Input
-    Store cases
+/ ==============================================
+/ READ NUMBER OF TEST CASES
+/ ==============================================
+    INPUT
+    STORE CASE_COUNT
 
-/ ---------------------------
-/ Main loop: process each case
-/ ---------------------------
-loop_cases, Load cases
-    Skipcond 400            / If cases == 0, go to end
-    Jump process_case
-    Jump end_program
+/ ==============================================
+/ MAIN LOOP: PROCESS EACH CASE
+/ ==============================================
+LOOP_CASES, LOAD CASE_COUNT
+    SKIPCOND 400           / IF CASE_COUNT == 0, END PROGRAM
+    JUMP PROCESS_CASE
+    JUMP END_PROGRAM
 
-/ ---------------------------
-/ Read inputs a and b, call egypt subroutine
-/ ---------------------------
-process_case, Input
-    Store a
-    Input
-    Store b
-    JnS egypt               / Egyptian decomposition
+/ ==============================================
+/ READ INPUTS AND CALL EGYPT SUBROUTINE
+/ ==============================================
+PROCESS_CASE, INPUT
+    STORE NUM_A
+    INPUT
+    STORE NUM_B
+    JNS EGYPT              / CALL EGYPTIAN DECOMPOSITION
 
-    / Print 0 to mark the end of this case
-    Load zero
-    Output
+    / PRINT 0 TO MARK END OF CASE
+    LOAD ZERO
+    OUTPUT
 
-    / Decrement remaining cases
-    Load cases
-    Subt one
-    Store cases
-    Jump loop_cases
+    / DECREMENT CASE COUNT
+    LOAD CASE_COUNT
+    SUBT ONE
+    STORE CASE_COUNT
+    JUMP LOOP_CASES
 
-/ ---------------------------
-/ End of program
-/ ---------------------------
-end_program, Halt
-
-
-/ =====================================================
-/ Subroutine: Egyptian Fraction Decomposition (egypt)
-/ =====================================================
-egypt,      HEX 0
-begin_egypt, Load a
-    Skipcond 400            / If a == 0, check b
-    Jump b_equal_0
-    Jump end_egypt
-
-b_equal_0, Load b
-    Skipcond 400            / If b == 0, skip next
-    Jump if_1
-    Jump end_egypt
-
-/ Case 1: If b divides a exactly
-if_1,   Load zero
-    Store div_times
-    Store div_mod
-    Load b
-    Store div_a
-    Load a
-    Store div_b
-    JnS div
-    Store c
-    Load c
-    Skipcond 400            / If remainder == 0
-    Jump if_2
-    Load div_times
-    Output
-    Jump end_egypt
-
-/ Case 2: If a divides b exactly
-if_2,   Load zero
-    Store div_times
-    Store div_mod
-    Load a
-    Store div_a
-    Load b
-    Store div_b
-    JnS div
-    Store c
-    Load c
-    Skipcond 400
-    Jump if_3
-    Load div_times
-    Output
-    Jump end_egypt
-
-/ Case 3: General recursive step
-if_3,   Load a
-    Subt b
-    Skipcond 800            / If a >= b
-    Jump egypt_else
-    Load zero
-    Store div_times
-    Store div_mod
-    Load a
-    Store div_a
-    Load b
-    Store div_b
-    JnS div
-    Store a
-    Load div_times
-    Output
-    Jump begin_egypt
-
-/ Case 4: a < b
-egypt_else, Load zero
-    Store div_times
-    Store div_mod
-    Store mult_acum
-    Load b
-    Store div_a
-    Load a
-    Store div_b
-    JnS div
-    Load div_times
-    Add one
-    Store n
-    Output
-
-    / a = a * n - b
-    Load a
-    Store mult_a
-    Load n
-    Store mult_b
-    JnS mult
-    Subt b
-    Store a
-
-    / b = b * n
-    Load zero
-    Store mult_acum
-    Load b
-    Store mult_a
-    Load n
-    Store mult_b
-    JnS mult
-    Store b
-
-    Jump begin_egypt
-
-end_egypt, JumpI egypt
+/ ==============================================
+/ END PROGRAM
+/ ==============================================
+END_PROGRAM, HALT
 
 
 / =====================================================
-/ Subroutine: Integer Division (div)
-/ Description: div_a / div_b = quotient (div_times),
-/ remainder (div_mod)
+/ SUBROUTINE: EGYPTIAN FRACTION DECOMPOSITION (EGYPT)
 / =====================================================
-div,    HEX 0
-loop_div, Load div_a
-    Skipcond 800
-    Jump fix_div
-    Load div_a
-    Subt div_b
-    Store div_a
-    Load div_times
-    Add one
-    Store div_times
-    Jump loop_div
+EGYPT, HEX 0
+BEGIN_EGYPT, LOAD NUM_A
+    SKIPCOND 400
+    JUMP CHECK_B_ZERO
+    JUMP END_EGYPT
 
-fix_div, Load div_a
-    Skipcond 000
-    Jump end_div
-    Load div_times
-    Subt one
-    Store div_times
-    Load div_a
-    Add div_b
-    Store div_mod
-    Jump end_div
+CHECK_B_ZERO, LOAD NUM_B
+    SKIPCOND 400
+    JUMP CASE1
+    JUMP END_EGYPT
 
-end_div, Load div_mod
-    JumpI div
+/ CASE 1: IF NUM_B DIVIDES NUM_A EXACTLY
+CASE1, LOAD ZERO
+    STORE DIV_QUOT
+    STORE DIV_REM
+    LOAD NUM_B
+    STORE DIV_A
+    LOAD NUM_A
+    STORE DIV_B
+    JNS DIVIDE
+    STORE TEMP_REM
+    LOAD TEMP_REM
+    SKIPCOND 400
+    JUMP CASE2
+    LOAD DIV_QUOT
+    OUTPUT
+    JUMP END_EGYPT
+
+/ CASE 2: IF NUM_A DIVIDES NUM_B EXACTLY
+CASE2, LOAD ZERO
+    STORE DIV_QUOT
+    STORE DIV_REM
+    LOAD NUM_A
+    STORE DIV_A
+    LOAD NUM_B
+    STORE DIV_B
+    JNS DIVIDE
+    STORE TEMP_REM
+    LOAD TEMP_REM
+    SKIPCOND 400
+    JUMP CASE3
+    LOAD DIV_QUOT
+    OUTPUT
+    JUMP END_EGYPT
+
+/ CASE 3: GENERAL STEP (NUM_A >= NUM_B)
+CASE3, LOAD NUM_A
+    SUBT NUM_B
+    SKIPCOND 800
+    JUMP CASE4
+    LOAD ZERO
+    STORE DIV_QUOT
+    STORE DIV_REM
+    LOAD NUM_A
+    STORE DIV_A
+    LOAD NUM_B
+    STORE DIV_B
+    JNS DIVIDE
+    STORE NUM_A
+    LOAD DIV_QUOT
+    OUTPUT
+    JUMP BEGIN_EGYPT
+
+/ CASE 4: NUM_A < NUM_B
+CASE4, LOAD ZERO
+    STORE DIV_QUOT
+    STORE DIV_REM
+    STORE MULT_ACC
+    LOAD NUM_B
+    STORE DIV_A
+    LOAD NUM_A
+    STORE DIV_B
+    JNS DIVIDE
+    LOAD DIV_QUOT
+    ADD ONE
+    STORE N
+    OUTPUT
+
+    / NUM_A = NUM_A * N - NUM_B
+    LOAD NUM_A
+    STORE MULT_A
+    LOAD N
+    STORE MULT_B
+    JNS MULTIPLY
+    SUBT NUM_B
+    STORE NUM_A
+
+    / NUM_B = NUM_B * N
+    LOAD ZERO
+    STORE MULT_ACC
+    LOAD NUM_B
+    STORE MULT_A
+    LOAD N
+    STORE MULT_B
+    JNS MULTIPLY
+    STORE NUM_B
+
+    JUMP BEGIN_EGYPT
+
+END_EGYPT, JUMPI EGYPT
 
 
 / =====================================================
-/ Subroutine: Multiplication (mult)
-/ Description: mult_a * mult_b = mult_acum
+/ SUBROUTINE: INTEGER DIVISION (DIVIDE)
 / =====================================================
-mult,   HEX 0
-loop_mult, Load mult_a
-    Skipcond 800
-    Jump end_mult
-    Load mult_acum
-    Add mult_b
-    Store mult_acum
-    Load mult_a
-    Subt one
-    Store mult_a
-    Jump loop_mult
+DIVIDE, HEX 0
+LOOP_DIV, LOAD DIV_A
+    SKIPCOND 800
+    JUMP FIX_DIV
+    LOAD DIV_A
+    SUBT DIV_B
+    STORE DIV_A
+    LOAD DIV_QUOT
+    ADD ONE
+    STORE DIV_QUOT
+    JUMP LOOP_DIV
 
-end_mult, Load mult_acum
-    JumpI mult
+FIX_DIV, LOAD DIV_A
+    SKIPCOND 000
+    JUMP END_DIV
+    LOAD DIV_QUOT
+    SUBT ONE
+    STORE DIV_QUOT
+    LOAD DIV_A
+    ADD DIV_B
+    STORE DIV_REM
+    JUMP END_DIV
+
+END_DIV, LOAD DIV_REM
+    JUMPI DIVIDE
 
 
 / =====================================================
-/ Variables
+/ SUBROUTINE: MULTIPLICATION (MULTIPLY)
 / =====================================================
-cases,      DEC 0       / Number of test cases
-a,          DEC 0       / Numerator
-b,          DEC 0       / Denominator
-c,          DEC 0       / Remainder holder
-n,          DEC 0       / Multiplier in Egyptian step
+MULTIPLY, HEX 0
+LOOP_MULT, LOAD MULT_A
+    SKIPCOND 800
+    JUMP END_MULT
+    LOAD MULT_ACC
+    ADD MULT_B
+    STORE MULT_ACC
+    LOAD MULT_A
+    SUBT ONE
+    STORE MULT_A
+    JUMP LOOP_MULT
 
-mult_a,     DEC 0       / Operand A for multiplication
-mult_b,     DEC 0       / Operand B for multiplication
-mult_acum,  DEC 0       / Accumulator for product
+END_MULT, LOAD MULT_ACC
+    JUMPI MULTIPLY
 
-div_a,      DEC 0       / Dividend
-div_b,      DEC 0       / Divisor
-div_times,  DEC 0       / Quotient
-div_mod,    DEC 0       / Remainder
 
-one,        DEC 1
-zero,       DEC 0
+/ =====================================================
+/ VARIABLES
+/ =====================================================
+CASE_COUNT, DEC 0
+NUM_A,      DEC 0
+NUM_B,      DEC 0
+TEMP_REM,   DEC 0
+N,          DEC 0
+
+MULT_A,     DEC 0
+MULT_B,     DEC 0
+MULT_ACC,   DEC 0
+
+DIV_A,      DEC 0
+DIV_B,      DEC 0
+DIV_QUOT,   DEC 0
+DIV_REM,    DEC 0
+
+ONE,        DEC 1
+ZERO,       DEC 0
 
             END
-

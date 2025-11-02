@@ -1,0 +1,167 @@
+     Assembly listing for: cuadratica.mas
+                Assembled: Tue Oct 07 15:05:20 COT 2025
+
+         |                                    /Programa que cálcula cuantas raices reales tiene una ecuación cuadrática
+         |                                    /Autor: Juan Esteban Sánchez García
+         |                                    
+         |                                    /MAIN
+         |                                    
+000 5000 |  Main        INPUT                  
+001 2045 |              STORE N                
+         |                                    
+002 1045 |  LoopCases   LOAD N                 
+003 8400 |              SKIPCOND 400           
+004 9006 |              JUMP ProcessCase       
+005 9033 |              JUMP End               
+         |                                    
+006 5000 |  ProcessCase INPUT                  
+007 2046 |              STORE A                
+008 5000 |              INPUT                  
+009 2047 |              STORE B                
+00A 5000 |              INPUT                  
+00B 2048 |              STORE C                
+         |                                    
+         |                                    /Calculate the discriminant D = b^2 -4ac
+         |                                    
+         |                                    /Calculus of b*b 
+00C 1047 |              LOAD B                 
+00D 2050 |              STORE MUL_A            
+00E 1047 |              LOAD B                 
+00F 2051 |              STORE MUL_B            
+010 0034 |              JNS MUL                
+011 204A |              STORE TEMP1           /TEMP1 = B^2
+         |                                    
+         |                                    /Calculus a*c 
+012 1046 |              LOAD A                 
+013 2050 |              STORE MUL_A            
+014 1048 |              LOAD C                 
+015 2051 |              STORE MUL_B            
+016 0034 |              JNS MUL                
+017 204B |              STORE TEMP2           /TEMP2 = a*c 
+         |                                    
+         |                                    /Calculus 4ac 
+018 104B |              LOAD TEMP2             
+019 2050 |              STORE MUL_A            
+01A 104F |              LOAD FOUR              
+01B 2051 |              STORE MUL_B            
+01C 0034 |              JNS MUL                
+01D 204B |              STORE TEMP2           /TEMP2 = 4ac 
+         |                                    
+         |                                    /Calculus TEMP1 - TEMP2 
+01E 104A |              LOAD TEMP1             
+01F 404B |              SUBT TEMP2             
+020 2049 |              STORE D                
+         |                                    
+         |                                    /Discriminant evaluation 
+021 1049 |              LOAD D                 
+022 8000 |              SKIPCOND 000          / D < 0 ?
+023 9027 |              JUMP NEGATIVE          
+024 8400 |              SKIPCOND 400          / D = 0? 
+025 904C |              JUMP CERO_VAL          
+026 902D |              JUMP POSITIVE         / D > 0
+         |                                    
+         |                                    /Cases 
+027 104C |  NEGATIVE    LOAD CERO_VAL          
+028 6000 |              OUTPUT                 
+029 902F |              JUMP Decrement         
+         |                                    
+02A 104D |  ZERO        LOAD ONE               
+02B 6000 |              OUTPUT                 
+02C 902F |              JUMP Decrement         
+         |                                    
+02D 104E |  POSITIVE    LOAD TWO               
+02E 6000 |              OUTPUT                 
+         |                                    
+02F 1045 |  Decrement   LOAD N                 
+030 404D |              SUBT ONE               
+031 2045 |              STORE N                
+032 9002 |              JUMP LoopCases         
+         |                                    
+033 7000 |  End         HALT                   
+         |                                    
+         |                                    
+         |                                    /----------------------------------------------------------
+         |                                    / Subrutina: MUL
+         |                                    / Multiplica dos enteros positivos (A * B)
+         |                                    / Resultado se retorna en AC
+         |                                    /----------------------------------------------------------
+         |                                    
+034 0000 |  MUL         HEX 0                  
+035 A000 |              CLEAR                  
+036 2053 |              STORE MUL_M           / M = 0
+037 2052 |              STORE MUL_I           / I = 0
+038 1052 |  MUL_WHILE   LOAD MUL_I             
+039 4050 |              SUBT MUL_A             
+03A 8000 |              SKIPCOND 000          / I < A ?
+03B 9043 |              JUMP MUL_ENDW         / No
+03C 1053 |              LOAD MUL_M             
+03D 3051 |              ADD MUL_B              
+03E 2053 |              STORE MUL_M           / M = M + B
+03F 1052 |              LOAD MUL_I             
+040 3054 |              ADD MUL_ONE            
+041 2052 |              STORE MUL_I           / I = I + 1
+042 9038 |              JUMP MUL_WHILE         
+043 1053 |  MUL_ENDW    LOAD MUL_M             
+044 C034 |              JUMPI MUL              
+         |                                    
+         |                                    /----------------------------------------------------------
+         |                                    / Variables
+         |                                    /----------------------------------------------------------
+045 0000 |  N           DEC 0                  
+046 0000 |  A           DEC 0                  
+047 0000 |  B           DEC 0                  
+048 0000 |  C           DEC 0                  
+049 0000 |  D           DEC 0                  
+04A 0000 |  TEMP1       DEC 0                  
+04B 0000 |  TEMP2       DEC 0                  
+04C 0000 |  CERO_VAL    DEC 0                  
+04D 0001 |  ONE         DEC 1                  
+04E 0002 |  TWO         DEC 2                  
+04F 0004 |  FOUR        DEC 4                  
+         |                                    
+         |                                    
+         |                                    /--- Variables internas de la subrutina MUL ---
+050 0000 |  MUL_A       DEC 0                  
+051 0000 |  MUL_B       DEC 0                  
+052 0000 |  MUL_I       DEC 0                  
+053 0000 |  MUL_M       DEC 0                  
+054 0001 |  MUL_ONE     DEC 1                  
+         |                                    
+         |              END                    
+
+Assembly successful.
+
+         SYMBOL TABLE
+         -------------------------------------------------------
+          Symbol      | Defined | References 
+         -------------+---------+-------------------------------
+          A           |   046   | 007, 012
+          B           |   047   | 009, 00C, 00E
+          C           |   048   | 00B, 014
+          CERO_VAL    |   04C   | 025, 027
+          D           |   049   | 020, 021
+          Decrement   |   02F   | 029, 02C
+          End         |   033   | 005
+          FOUR        |   04F   | 01A
+          LoopCases   |   002   | 032
+          MUL         |   034   | 010, 016, 01C, 044
+          MUL_A       |   050   | 00D, 013, 019, 039
+          MUL_B       |   051   | 00F, 015, 01B, 03D
+          MUL_ENDW    |   043   | 03B
+          MUL_I       |   052   | 037, 038, 03F, 041
+          MUL_M       |   053   | 036, 03C, 03E, 043
+          MUL_ONE     |   054   | 040
+          MUL_WHILE   |   038   | 042
+          Main        |   000   | 
+          N           |   045   | 001, 002, 02F, 031
+          NEGATIVE    |   027   | 023
+          ONE         |   04D   | 02A, 030
+          POSITIVE    |   02D   | 026
+          ProcessCase |   006   | 004
+          TEMP1       |   04A   | 011, 01E
+          TEMP2       |   04B   | 017, 018, 01D, 01F
+          TWO         |   04E   | 02D
+          ZERO        |   02A   | 
+         -------------------------------------------------------
+
+

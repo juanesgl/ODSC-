@@ -1,179 +1,208 @@
-/ Program: Calculate the number of real roots of a quadratic equation
+/ Program: Calculate the number of real roots of a quadratic equation (FINAL ANTI-OVERFLOW TOTAL)
 / Author: Juan Esteban Sánchez García
+/ Fixes: Anti-overflow patch applied to all three negations (mult_op1, mult_op2, and final mult_result).
 
-            ORG 100          / Program start address
-   
-            INPUT            / Read number of test cases
+            ORG 100
+
+            INPUT
             STORE num_cases
 
 case_loop,  LOAD num_cases
-            SKIPCOND 400     / If num_cases == 0, end program
+            SKIPCOND 400     / Skip JUMP process_case if AC = 0
             JUMP process_case
-            JUMP end_program
+            JUMP end_program / If num_cases = 0, HALT
 
-process_case, INPUT           / Read coefficient a
+process_case, INPUT
             STORE coef_a
-            INPUT             / Read coefficient b
+            INPUT
             STORE coef_b
-            INPUT             / Read coefficient c
+            INPUT
             STORE coef_c
 
-/ --------------------------- 
-/ Compute b^2 
-/ --------------------------- 
+/ =====================================================
+/ 1. Compute b^2
+/ =====================================================
             LOAD coef_b
-            STORE mult_op1       / First operand for multiplication
+            STORE mult_op1
             LOAD coef_b
-            STORE mult_op2       / Second operand
-            JNS multiply
-            STORE b_squared      / Save b^2
+            STORE mult_op2
+            JNS multiply     / Call multiplication subroutine (b*b)
+            LOAD mult_result
+            STORE b_squared
 
-/ --------------------------- 
-/ Compute 4ac 
-/ --------------------------- 
-        / Compute a*c
+/ =====================================================
+/ 2. Compute 4*a*c
+/ =====================================================
+/ First, compute a*c
             LOAD coef_a
             STORE mult_op1
             LOAD coef_c
             STORE mult_op2
-            JNS multiply
-            STORE fourac         
-
-        / Multiply by 4
+            JNS multiply     / Call multiplication subroutine (a*c)
+            LOAD mult_result
+            STORE fourac     / fourac = a*c (temporal)
+            
+/ Then, compute 4*(a*c)
             LOAD fourac
             STORE mult_op1
             LOAD const_four
             STORE mult_op2
-            JNS multiply
-            STORE fourac
+            JNS multiply     / Call multiplication subroutine (4*a*c)
+            LOAD mult_result
+            STORE fourac     / fourac = 4*a*c (final)
 
-/ --------------------------- 
-/ Compute discriminant d = b^2 - 4ac 
-/ --------------------------- 
+/ =====================================================
+/ 3. Compute discriminant d = b^2 - 4ac
+/ =====================================================
             LOAD b_squared
             SUBT fourac
             STORE discriminant
 
-/ --------------------------- 
-/ Determine number of real roots 
-/ --------------------------- 
+/ =====================================================
+/ 4. Check discriminant sign
+/ =====================================================
             LOAD discriminant
-            SKIPCOND 000         / If d < 0
-            JUMP check_zero
-            JUMP is_negative
+            SKIPCOND 000      / Skip JUMP check_zero if d < 0
+            JUMP check_zero   / d >= 0, check for zero
+            JUMP is_negative  / d < 0: 0 real roots
 
-check_zero, SKIPCOND 400         / If d == 0
-            JUMP is_positive     / If not zero, d > 0
-            JUMP is_zero
+check_zero, LOAD discriminant   
+            SKIPCOND 400      / Skip JUMP is_positive if d = 0
+            JUMP is_positive  / d > 0: 2 real roots
+            JUMP is_zero      / d = 0: 1 real root
 
-is_negative, LOAD roots_0        / 0 real roots
+is_negative, LOAD roots_0
             OUTPUT
             JUMP next_case
 
-is_zero,    LOAD roots_1         / 1 real root
+is_zero,    LOAD roots_1
             OUTPUT
             JUMP next_case
 
-is_positive, LOAD roots_2        / 2 real roots
+is_positive, LOAD roots_2
             OUTPUT
             JUMP next_case
 
-/ --------------------------- 
-/ Prepare next case 
-/ --------------------------- 
 next_case,  LOAD num_cases
             SUBT const_one
             STORE num_cases
             JUMP case_loop
 
-/ --------------------------- 
-/ End of program 
-/ --------------------------- 
 end_program, HALT
 
-/ --------------------------- 
-/ Subroutine: multiply (general version)
-/ --------------------------- 
-
-multiply,   HEX 0                / Return address
+/ =====================================================
+/ Subroutine: Multiplication (Anti-Overflow Total)
+/ =====================================================
+multiply,   HEX 0            / Placeholder for return address
             
             CLEAR
             STORE mult_result
-            CLEAR
-            STORE neg_flag        / Sign flag (0 = +, 1 = -)
+            STORE sign_flag  / Inicializar sign_flag = 0
 
-        / --- Check signs
-
-check_signs, LOAD mult_op1
-            SKIPCOND 800          / If mult_op1 > 0
-            JUMP check_second     / If mult_op1 < 0, handle negative case
-            JUMP swap_operands    / If positive, proceed normally
-
-check_second, LOAD mult_op2 
-            SKIPCOND 800          / If mult_op2 > 0, go to core multiplication
-            JUMP fix_sign         / If mult_op2 < 0, make positive
-            JNS mult_core
-            JUMP finalize_mult
-
-fix_sign,   CLEAR
-            SUBT mult_op2         / mult_op2 = -mult_op2
-            STORE mult_op2
-            LOAD neg_flag
-            ADD const_one 
-            STORE neg_flag
-            JNS mult_core
-            JUMP finalize_mult
-
-swap_operands, LOAD mult_op1     / Ensure second operand is positive
-            STORE temp
-            LOAD mult_op2
+            / 1. Check for 0
+            LOAD mult_op1
+            SKIPCOND 400
+            JUMP check_op2_zero
+            JUMP mult_done   
+            
+check_op2_zero, LOAD mult_op2
+            SKIPCOND 400
+            JUMP check_op1_sign 
+            JUMP mult_done   
+            
+            / 2. Check and negate mult_op1 if negative (Sign Handling)
+check_op1_sign, LOAD mult_op1
+            SKIPCOND 800     / Skip JUMP op1_neg_check if AC > 0
+            JUMP op1_neg_check 
+            
+            JUMP check_op2_sign / AC > 0, va a chequear op2
+            
+op1_neg_check, LOAD mult_op1
+            SUBT const_min_neg 
+            SKIPCOND 400       / Skip JUMP op1_neg if AC = 0 (is -32768)
+            JUMP op1_neg       / mult_op1 != -32768, se puede negar
+            
+op1_is_min_neg, LOAD sign_flag
+            ADD const_one    
+            STORE sign_flag
+            JUMP check_op2_sign 
+            
+op1_neg,    CLEAR
+            SUBT mult_op1    / AC = -mult_op1 (absolute value)
             STORE mult_op1
-            LOAD temp
-            STORE mult_op2
-            JNS mult_core
-            JUMP finalize_mult
-
-finalize_mult, LOAD neg_flag
-            SKIPCOND 400          / If neg_flag == 0, result is already positive
-            JUMP fix_result_sign  / Otherwise, make result positive
-            JUMP mult_end
-
-fix_result_sign, CLEAR
-            SUBT mult_result      / mult_result = -mult_result
-            STORE mult_result
-            JUMP mult_end
-
-mult_end,   LOAD mult_result
-            JUMPI multiply
-
-/ --------------------------- 
-/ Subroutine: mult_core (pure positive multiplication)
-/ --------------------------- 
-
-mult_core,  HEX 0                / Return address
+            LOAD sign_flag
+            ADD const_one    
+            STORE sign_flag
+            JUMP check_op2_sign 
             
-            CLEAR
+            / 3. Check and negate mult_op2 if negative (Sign Handling)
+check_op2_sign, LOAD mult_op2
+            SKIPCOND 800     / Skip JUMP op2_neg_check if AC > 0
+            JUMP op2_neg_check 
+            
+            JUMP mult_loop_init 
+            
+op2_neg_check, LOAD mult_op2
+            SUBT const_min_neg 
+            SKIPCOND 400       / Skip JUMP op2_neg if AC = 0 (is -32768)
+            JUMP op2_neg       / mult_op2 != -32768, se puede negar
+            
+op2_is_min_neg, LOAD sign_flag
+            ADD const_one    
+            STORE sign_flag
+            JUMP mult_loop_init 
+            
+op2_neg,    CLEAR
+            SUBT mult_op2    / AC = -mult_op2 (absolute value)
+            STORE mult_op2
+            LOAD sign_flag
+            ADD const_one    
+            STORE sign_flag
+            JUMP mult_loop_init 
+            
+            / 4. Multiplication by repeated addition
+mult_loop_init, LOAD mult_op2
+            SKIPCOND 400     / If mult_op2 (contador) = 0, skip
+            JUMP mult_body   
+            
+            JUMP apply_sign  
+            
+mult_body,  LOAD mult_result
+            ADD mult_op1     
             STORE mult_result
-
-mult_loop,  LOAD mult_op2
-            SKIPCOND 400          / If counter == 0, exit loop
-            JUMP continue_mult
-            JUMP end_mult_core
-
-continue_mult, LOAD mult_result
-            ADD mult_op1
-            STORE mult_result
-
+            
             LOAD mult_op2
             SUBT const_one
-            STORE mult_op2
-            JUMP mult_loop
+            STORE mult_op2   / Decrement counter
+            JUMP mult_loop_init
+            
+            / 5. Apply sign: If sign_flag is odd (1), negate result.
+apply_sign, LOAD sign_flag
+            SUBT const_one     
+            SKIPCOND 400       / Skip if (sign_flag - 1) = 0, meaning sign_flag = 1 (impar)
+            JUMP mult_done_check_result / Sign_flag fue 0 o 2 (par), resultado es positivo, retorna.
+            
+            / Si llega aquí, es porque sign_flag = 1 (impar).
+            / CHECK DE OVERFLOW DEL RESULTADO FINAL
+negate_result_check, LOAD mult_result
+            SUBT const_min_neg 
+            SKIPCOND 400       / Skip JUMP negate_result if AC = 0 (is -32768)
+            JUMP negate_result / mult_result != -32768, se puede negar
+            
+            / Caso de overflow (-32768) en el resultado: Lo dejamos como -32768, no lo negamos.
+            JUMP mult_done
+            
+negate_result, CLEAR
+            SUBT mult_result
+            STORE mult_result
+            
+mult_done_check_result, JUMP mult_done
+            
+mult_done,  JUMPI multiply   / Return to caller
 
-end_mult_core, JUMPI mult_core
-
-/ --------------------------- 
-/ Variables 
-/ --------------------------- 
+/ =====================================================
+/ Variables and Constants
+/ =====================================================
 num_cases,      DEC 0
 coef_a,         DEC 0
 coef_b,         DEC 0
@@ -182,18 +211,15 @@ b_squared,      DEC 0
 fourac,         DEC 0
 discriminant,   DEC 0
 
-/ Multiplication helpers 
 mult_op1,       DEC 0
 mult_op2,       DEC 0
 mult_result,    DEC 0
-temp,           DEC 0
-neg_flag,       DEC 0
+sign_flag,      DEC 0
 
-/ --------------------------- 
-/ Constants 
-/ --------------------------- 
-const_one,      DEC 1 
+const_one,      DEC 1
 const_four,     DEC 4
-roots_0,        DEC 0   / Number of real roots
+roots_0,        DEC 0
 roots_1,        DEC 1
 roots_2,        DEC 2
+const_min_neg,  DEC -32768   / Valor mínimo negativo (HEX 8000)
+

@@ -1,0 +1,7 @@
+Combinational Analysis (Truth Tables)
+
+Implement in HDL  a simple ALU with four basic operations -AND, OR, NOT and addition-carried out on two machine words of 2 bits each. 
+The control lines, f0 and f1, determine which operation is to be performed by the ALU. 
+The signal 00 (f0=0, f1=0)is used for addition (A + B); 01 (f0=0, f1=1) for NOT A; 10 (f0=1, f1=0) for A OR B, and 11 (f0=1, f1=1)for A AND B.  
+The input lines A0 and A1 indicate two bits of one word, and B0 and B1 indicate the second word. C0 and C1 represent de output word and C 
+represents the carry if addition is performed. The circuit file must be named ALU1.hdl

@@ -1,0 +1,55 @@
+// This file contains the solution to the Lab06b.
+// Made by Juan Esteban Sanchez Garcia
+
+/*
+ * 3-bit Adder with Carry
+ * Given two 3-bit words A and B, performs the addition A + B
+ */
+
+
+CHIP sum3 
+{
+    IN A2, A1, A0, B2, B1, B0;
+    OUT C, S2, S1, S0;
+    
+    PARTS:
+    // ========================================================================
+    // BIT 0: HALF ADDER (no carry input)
+    // Computes: S0 = A0 ⊕ B0
+    //           carry0 = A0 · B0
+    // ========================================================================
+    
+    Xor(a=A0, b=B0, out=S0);              // Sum bit 0
+    And(a=A0, b=B0, out=carry0);          // Carry to bit 1
+    
+    
+    // ========================================================================
+    // BIT 1: FULL ADDER (with carry input from bit 0)
+    // Computes: S1 = A1 ⊕ B1 ⊕ carry0
+    //           carry1 = (A1·B1) + ((A1⊕B1)·carry0)
+    // ========================================================================
+    
+    
+    Xor(a=A1, b=B1, out=xorA1B1);
+    Xor(a=xorA1B1, b=carry0, out=S1);     // Sum bit 1
+    
+
+    And(a=A1, b=B1, out=carryA1B1);       // Direct carry: A1·B1
+    And(a=xorA1B1, b=carry0, out=carryProp1); // Propagated carry: (A1⊕B1)·carry0
+    Or(a=carryA1B1, b=carryProp1, out=carry1); // Total carry to bit 2
+    
+    
+    // ========================================================================
+    // BIT 2: FULL ADDER (with carry input from bit 1)
+    // Computes: S2 = A2 ⊕ B2 ⊕ carry1
+    //           C = (A2·B2) + ((A2⊕B2)·carry1)
+    // ========================================================================
+    
+    Xor(a=A2, b=B2, out=xorA2B2);
+    Xor(a=xorA2B2, b=carry1, out=S2);     // Sum bit 2
+    
+    And(a=A2, b=B2, out=carryA2B2);       // Direct carry: A2·B2
+    And(a=xorA2B2, b=carry1, out=carryProp2); // Propagated carry: (A2⊕B2)·carry1
+    Or(a=carryA2B2, b=carryProp2, out=C); // Final carry (overflow)
+    
+}

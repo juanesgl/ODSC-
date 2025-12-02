@@ -1,0 +1,78 @@
+/**
+ * Mux8Way12 (Eight-Way 12-bit Multiplexer)
+ * ----------------------------------------
+ * Selects one of eight 48-bit inputs (a through h) based on a 3-bit selector.
+ * Each input is grouped as four 12-bit segments:
+ *   a → a3,a2,a1,a0
+ *   b → b3,b2,b1,b0
+ *   ...
+ *   h → h3,h2,h1,h0
+ *
+ * Selection Logic
+ * ---------------
+ * The 3-bit selector `sel[2..0]` determines which of the eight inputs is
+ * routed to the output:
+ *
+ *   sel = 000 → out = a
+ *   sel = 001 → out = b
+ *   sel = 010 → out = c
+ *   sel = 011 → out = d
+ *   sel = 100 → out = e
+ *   sel = 101 → out = f
+ *   sel = 110 → out = g
+ *   sel = 111 → out = h
+ *
+ * Three-Stage Hierarchical Selection
+ * ----------------------------------
+ *
+ * Stage 1 — Lower Half (a–d)
+ *   A Mux4Way12 selects one input among a, b, c, d using sel[0..1].
+ *   The result is stored in intermediate values mux0*.
+ *
+ * Stage 2 — Upper Half (e–h)
+ *   A second Mux4Way12 selects among e, f, g, h using sel[0..1].
+ *   The result is stored in intermediate values mux1*.
+ *
+ * Stage 3 — Final Half Selection
+ *   A Mux12 selects between:
+ *       mux0* (result of a–d group)
+ *       mux1* (result of e–h group)
+ *   This final step is controlled by sel[2].
+ */
+
+CHIP Mux8Way12 
+{
+    IN sel[3], 
+       a3[12], a2[12], a1[12], a0[12],
+       b3[12], b2[12], b1[12], b0[12],
+       c3[12], c2[12], c1[12], c0[12],
+       d3[12], d2[12], d1[12], d0[12],
+       e3[12], e2[12], e1[12], e0[12],
+       f3[12], f2[12], f1[12], f0[12],
+       g3[12], g2[12], g1[12], g0[12],
+       h3[12], h2[12], h1[12], h0[12];
+    OUT out3[12], out2[12], out1[12], out0[12];
+    
+    PARTS:
+    // Stage 1 — Select between a,b,c,d
+    Mux4Way12(sel=sel[0..1],
+              a3=a3, a2=a2, a1=a1, a0=a0,
+              b3=b3, b2=b2, b1=b1, b0=b0,
+              c3=c3, c2=c2, c1=c1, c0=c0,
+              d3=d3, d2=d2, d1=d1, d0=d0,
+              out3=mux03, out2=mux02, out1=mux01, out0=mux00);
+              
+    // Stage 1 — Select between e,f,g,h
+    Mux4Way12(sel=sel[0..1],
+              a3=e3, a2=e2, a1=e1, a0=e0,
+              b3=f3, b2=f2, b1=f1, b0=f0,
+              c3=g3, c2=g2, c1=g1, c0=g0,
+              d3=h3, d2=h2, d1=h1, d0=h0,
+              out3=mux13, out2=mux12, out1=mux11, out0=mux10);
+              
+    // Stage 3 — Final selection between the two halves
+    Mux12(sel=sel[2], 
+          a3=mux03, a2=mux02, a1=mux01, a0=mux00,
+          b3=mux13, b2=mux12, b1=mux11, b0=mux10,
+          out3=out3, out2=out2, out1=out1, out0=out0);
+}

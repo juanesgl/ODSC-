@@ -1,0 +1,67 @@
+/**
+ * Mux4Way12 (Four-Way 12-bit Multiplexer)
+ * ---------------------------------------
+ * Selects one of four 48-bit inputs (a, b, c, d) based on a 2-bit selector.
+ * Each input is organized as four 12-bit segments:
+ *   a → a3,a2,a1,a0
+ *   b → b3,b2,b1,b0
+ *   c → c3,c2,c1,c0
+ *   d → d3,d2,d1,d0
+ *
+ * Selection Logic
+ * ---------------
+ * The 2-bit selector `sel[1..0]` determines which of the four inputs is
+ * forwarded to the four 12-bit outputs (out3..out0):
+ *
+ *   sel = 00 → out = a
+ *   sel = 01 → out = b
+ *   sel = 10 → out = c
+ *   sel = 11 → out = d
+ *
+ * Two-Stage Hierarchical Selection
+ * --------------------------------
+ *
+ * Stage 1 — Pairwise Selection
+ *   Two Mux12 units select between:
+ *     • a vs b  (controlled by sel[0])
+ *     • c vs d  (controlled by sel[0])
+ *
+ *   These produce two intermediate 48-bit values:
+ *     • mux0*  → result of choosing between a and b
+ *     • mux1*  → result of choosing between c and d
+ *
+ * Stage 2 — Final Selection Between the Two Pairs
+ *   A third Mux12 selects which intermediate value becomes the final output,
+ *   controlled by sel[1].
+ */
+
+CHIP Mux4Way12 
+{
+
+    IN sel[2], 
+       a3[12], a2[12], a1[12], a0[12],  
+       b3[12], b2[12], b1[12], b0[12], 
+       c3[12], c2[12], c1[12], c0[12],  
+       d3[12], d2[12], d1[12], d0[12]; 
+    OUT out3[12], out2[12], out1[12], out0[12];  
+    
+    PARTS:
+
+    // Stage 1 — Select between a and b
+    Mux12(sel=sel[0], 
+          a3=a3, a2=a2, a1=a1, a0=a0, 
+          b3=b3, b2=b2, b1=b1, b0=b0,
+          out3=mux03, out2=mux02, out1=mux01, out0=mux00);
+          
+    // Stage 1 — Select between c and d
+    Mux12(sel=sel[0], 
+          a3=c3, a2=c2, a1=c1, a0=c0,
+          b3=d3, b2=d2, b1=b1, b0=b0,
+          out3=mux13, out2=mux12, out1=mux11, out0=mux10);
+          
+    // Stage 2 — Select final result between (a/b) and (c/d)
+    Mux12(sel=sel[1], 
+          a3=mux03, a2=mux02, a1=mux01, a0=mux00,
+          b3=mux13, b2=mux12, b1=mux11, b0=mux10,
+          out3=out3, out2=out2, out1=out1, out0=out0);
+}

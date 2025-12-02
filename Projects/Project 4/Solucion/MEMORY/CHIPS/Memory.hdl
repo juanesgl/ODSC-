@@ -1,0 +1,235 @@
+/**
+ * Memory
+ * ------
+ * Description:
+ * This chip implements a 32-word memory unit. Each word contains 48 bits,
+ * represented as four 12-bit segments (in3, in2, in1, in0). The memory is
+ * organized hierarchically into four blocks of eight words each.
+ *
+ * Addressing structure:
+ * - The 5-bit address `a` is divided as follows:
+ *      a[3..4] : Selects one of the 4 memory blocks.
+ *      a[0..2] : Selects one of the 8 words inside the chosen block.
+ *
+ * Writing mechanism:
+ * - The global write-enable signal `w` is demultiplexed using DMux4Way and 
+ *   DMux8Way, ensuring that exactly one of the 32 words receives a load = 1.
+ * - Each word is implemented using a `word48` chip, capable of storing a 
+ *   48-bit value split into four 12-bit inputs.
+ *
+ * Reading mechanism:
+ * - First, each block uses a Mux8Way12 to select the word inside the block.
+ * - Then, a Mux4Way12 selects the block output based on a[3..4].
+ *
+ * Inputs:
+ *   a[5]     : 5-bit address specifying which of the 32 words to access.
+ *   in3[12]  : Most significant 12 bits of the 48-bit input word.
+ *   in2[12]  : Middle-high 12 bits.
+ *   in1[12]  : Middle-low 12 bits.
+ *   in0[12]  : Least significant 12 bits.
+ *   w        : Global write enable. When active, the selected word loads input.
+ *
+ * Outputs:
+ *   out3[12] : Most significant 12 bits of the selected 48-bit word.
+ *   out2[12] : Middle-high 12 bits.
+ *   out1[12] : Middle-low 12 bits.
+ *   out0[12] : Least significant 12 bits.
+ *
+ * Implementation summary:
+ * - DMux4Way routes the global write signal to one of the four blocks.
+ * - Each block uses a DMux8Way to generate a load signal for each word.
+ * - 32 `word48` chips implement the actual storage.
+ * - Four Mux8Way12 units select the internal word per block.
+ * - One Mux4Way12 produces the final 48-bit output from the four blocks.
+ */
+
+CHIP Memory
+{
+    IN a[5], in3[12],in2[12], in1[12], in0[12], w; 
+    OUT out3[12], out2[12], out1[12], out0[12];
+
+    PARTS: 
+
+	/**
+     * Block Selection Stage
+     * ---------------------
+     * The DMux4Way uses address bits a[3..4] to choose which of the four
+     * memory blocks (0–3) should receive the write-enable signal. Only one
+     * of the outputs (w0, w1, w2, w3) becomes active at a time.
+     *
+     * Block mapping:
+     *   Block 0 → addresses 0–7
+     *   Block 1 → addresses 8–15
+     *   Block 2 → addresses 16–23
+     *   Block 3 → addresses 24–31
+     *
+     * This ensures that the write operation is directed only to the block
+     * corresponding to the upper two bits of the address.
+     */
+
+    DMux4Way(in = w, sel = a[3..4], a = w0, b = w1, c = w2, d = w3);
+
+    /**
+     * Block 0 (Addresses 0–7)
+     * -----------------------
+     * Activated when w0 = 1. Inside the block, a DMux8Way decodes the lower
+     * three address bits (a[0..2]) to enable exactly one of the eight words.
+     *
+     * Each word is a 48-bit register implemented by a word48 unit. Only the
+     * word whose select signal is active will load new data during a write.
+     *
+     * During reads, a Mux8Way12 selects the appropriate word output based on
+     * a[0..2], producing the block’s 48-bit result.
+     */
+
+    DMux8Way(in = w0, sel = a[0..2], a = sel00, b = sel01, c = sel02, d=sel03, e=sel04, f=sel05, g=sel06, h=sel07);
+    word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel00, out3=r003, out2=r002, out1=r001, out0=r000);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel01, out3=r013, out2=r012, out1=r011, out0=r010);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel02, out3=r023, out2=r022, out1=r021, out0=r020);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel03, out3=r033, out2=r032, out1=r031, out0=r030);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel04, out3=r043, out2=r042, out1=r041, out0=r040);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel05, out3=r053, out2=r052, out1=r051, out0=r050);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel06, out3=r063, out2=r062, out1=r061, out0=r060);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel07, out3=r073, out2=r072, out1=r071, out0=r070);
+
+	/**
+     * Block 1 (Addresses 8–15)
+     * ------------------------
+     * This block becomes active when w1 = 1. A DMux8Way once again uses
+     * a[0..2] to generate eight load signals, one for each word in the block.
+     *
+     * Only one word receives the write signal at a time. For read operations,
+     * a Mux8Way12 selects which of the eight words provides the block’s output.
+     *
+     * Functionally identical to Block 0 but mapped to addresses 8–15.
+     */
+
+    DMux8Way(in=w1, sel=a[0..2], a=sel08, b=sel09, c=sel10, d=sel11, e=sel12, f=sel13, g=sel14, h=sel15);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel08, out3=r083, out2=r082, out1=r081, out0=r080);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel09, out3=r093, out2=r092, out1=r091, out0=r090);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel10, out3=r103, out2=r102, out1=r101, out0=r100);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel11, out3=r113, out2=r112, out1=r111, out0=r110);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel12, out3=r123, out2=r122, out1=r121, out0=r120);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel13, out3=r133, out2=r132, out1=r131, out0=r130);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel14, out3=r143, out2=r142, out1=r141, out0=r140);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel15, out3=r153, out2=r152, out1=r151, out0=r150);
+
+	/**
+     * Block 2 (Addresses 16–23)
+     * -------------------------
+     * Enabled when w2 = 1. The DMux8Way produces eight word-select signals
+     * based on a[0..2], ensuring that only one of the block's words loads
+     * data during a write.
+     *
+     * A Mux8Way12 performs the read selection, returning the appropriate
+     * 48-bit word stored in this block.
+     *
+     * Identical structure to Blocks 0 and 1.
+     */
+
+	DMux8Way(in=w2, sel=a[0..2], a=sel16, b=sel17, c=sel18, d=sel19, e=sel20, f=sel21, g=sel22, h=sel23);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel16, out3=r163, out2=r162, out1=r161, out0=r160);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel17, out3=r173, out2=r172, out1=r171, out0=r170);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel18, out3=r183, out2=r182, out1=r181, out0=r180);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel19, out3=r193, out2=r192, out1=r191, out0=r190);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel20, out3=r203, out2=r202, out1=r201, out0=r200);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel21, out3=r213, out2=r212, out1=r211, out0=r210);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel22, out3=r223, out2=r222, out1=r221, out0=r220);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel23, out3=r233, out2=r232, out1=r231, out0=r230);
+
+	/**
+     * Block 3 (Addresses 24–31)
+     * -------------------------
+     * Enabled when w3 = 1. As in the previous blocks, the DMux8Way routes the
+     * write-enable signal to exactly one of the eight internal words, selected
+     * via a[0..2].
+     *
+     * The block’s read output is obtained with a Mux8Way12, controlled by the
+     * same lower address bits.
+     *
+     * This block covers the highest address range of the memory.
+     */
+
+	DMux8Way(in=w3, sel=a[0..2], a=sel24, b=sel25, c=sel26, d=sel27, e=sel28, f=sel29, g=sel30, h=sel31);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel24, out3=r243, out2=r242, out1=r241, out0=r240);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel25, out3=r253, out2=r252, out1=r251, out0=r250);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel26, out3=r263, out2=r262, out1=r261, out0=r260);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel27, out3=r273, out2=r272, out1=r271, out0=r270);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel28, out3=r283, out2=r282, out1=r281, out0=r280);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel29, out3=r293, out2=r292, out1=r291, out0=r290);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel30, out3=r303, out2=r302, out1=r301, out0=r300);
+	word48(in3=in3, in2=in2, in1=in1, in0=in0, load=sel31, out3=r313, out2=r312, out1=r311, out0=r310);
+
+
+
+	/**
+     * Read Path (Two-Stage Output Selection)
+     * --------------------------------------
+     * Reading from memory is performed in two hierarchical steps:
+     *
+     * Stage 1 — Word Selection inside Each Block
+     *   Each block uses a Mux8Way12 to select one of its eight stored words
+     *   based on address bits a[0..2]. This produces a 48-bit output for
+     *   each block.
+     *
+     * Stage 2 — Block Selection
+     *   A Mux4Way12 selects which block’s 48-bit output becomes the final
+     *   memory output, controlled by the upper address bits a[3..4].
+     *
+     * This two-level design reflects the physical layout of the memory and
+     * ensures clean and scalable routing of stored data.
+     */
+
+
+    Mux4Way12(sel=a[3..4],
+            a3=out03, a2=out02, a1=out01, a0=out00,
+            b3=out13, b2=out12, b1=out11, b0=out10,
+            c3=out23, c2=out22, c1=out21, c0=out20,
+            d3=out33, d2=out32, d1=out31, d0=out30,
+            out3=out3, out2=out2, out1=out1, out0=out0);
+
+	Mux8Way12(sel=a[0..2], 
+        	a3=r003, a2=r002, a1=r001, a0=r000,
+            b3=r013, b2=r012, b1=r011, b0=r010,
+            c3=r023, c2=r022, c1=r021, c0=r020,
+            d3=r033, d2=r032, d1=r031, d0=r030,
+            e3=r043, e2=r042, e1=r041, e0=r040,
+            f3=r053, f2=r052, f1=r051, f0=r050,
+            g3=r063, g2=r062, g1=r061, g0=r060,
+            h3=r073, h2=r072, h1=r071, h0=r070,
+            out3=out03, out2=out02, out1=out01, out0=out00);
+              
+	Mux8Way12(sel=a[0..2], 
+        	a3=r083, a2=r082, a1=r081, a0=r080,
+            b3=r093, b2=r092, b1=r091, b0=r090,
+            c3=r103, c2=r102, c1=r101, c0=r100,
+            d3=r113, d2=r112, d1=r111, d0=r110,
+            e3=r123, e2=r122, e1=r121, e0=r120,
+            f3=r133, f2=r132, f1=r131, f0=r130,
+            g3=r143, g2=r142, g1=r141, g0=r140,
+            h3=r153, h2=r152, h1=r151, h0=r150,
+            out3=out13, out2=out12, out1=out11, out0=out10);
+              
+	Mux8Way12(sel=a[0..2], 
+        	a3=r163, a2=r162, a1=r161, a0=r160,
+            b3=r173, b2=r172, b1=r171, b0=r170,
+            c3=r183, c2=r182, c1=r181, c0=r180,
+            d3=r193, d2=r192, d1=r191, d0=r190,
+            e3=r203, e2=r202, e1=r201, e0=r200,
+            f3=r213, f2=r212, f1=r211, f0=r210,
+            g3=r223, g2=r222, g1=r221, g0=r220,
+            h3=r233, h2=r232, h1=r231, h0=r230,
+            out3=out23, out2=out22, out1=out21, out0=out20);
+              
+	Mux8Way12(sel=a[0..2], 
+        	a3=r243, a2=r242, a1=r241, a0=r240,
+            b3=r253, b2=r252, b1=r251, b0=r250,
+            c3=r263, c2=r262, c1=r261, c0=r260,
+            d3=r273, d2=r272, d1=r271, d0=r270,
+            e3=r283, e2=r282, e1=r281, e0=r280,
+            f3=r293, f2=r292, f1=r291, f0=r290,
+            g3=r303, g2=r302, g1=r301, g0=r300,
+            h3=r313, h2=r312, h1=r311, h0=r310,
+            out3=out33, out2=out32, out1=out31, out0=out30);
+
+}

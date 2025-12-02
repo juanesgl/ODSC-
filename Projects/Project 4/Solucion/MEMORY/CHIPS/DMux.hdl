@@ -1,0 +1,36 @@
+/**
+ * DMux
+ * ----
+ * Description:
+ * This circuit implements a 1-to-2 demultiplexer. It routes the single input
+ * value `in` to exactly one of the two outputs (`a` or `b`), depending on the 
+ * control bit `sel`.
+ *
+ * Behavior:
+ * - If sel = 0, then output `a` receives the value of `in`, and `b` is 0.
+ * - If sel = 1, then output `b` receives the value of `in`, and `a` is 0.
+ *
+ * Implementation details:
+ * - A NOT gate is used to obtain the complement of the selection bit.
+ * - Two AND gates combine the input with the appropriate selection signal,
+ *   ensuring that only one output is active at a time.
+ *
+ * Inputs:
+ *   in  : Data input bit.
+ *   sel : Control bit that selects the output line.
+ *
+ * Outputs:
+ *   a : Equals `in` when sel = 0; otherwise 0.
+ *   b : Equals `in` when sel = 1; otherwise 0.
+ */
+
+CHIP DMux 
+{
+    IN in, sel;
+    OUT a, b;
+
+    PARTS:
+    Not(in=sel, out=notSel);
+    And(a=in, b=notSel, out=a);
+    And(a=in, b=sel, out=b);
+}

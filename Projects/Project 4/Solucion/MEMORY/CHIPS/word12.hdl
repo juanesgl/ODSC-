@@ -1,0 +1,43 @@
+/**
+* 12-Bit Register (word12)
+* -------------------------
+* This chip implements a 12-bit memory register composed of twelve
+* individual Bit cells. Each Bit stores one binary value and updates
+* itself on the rising clock edge when `load = 1`.
+*
+* Write Path — Controlled Bit-Level Storage
+*   All 12 bits receive the shared control signal `load`. If `load = 1`,
+*   each Bit captures the corresponding input value in[i]. If `load = 0`,
+*   the previously stored value is preserved.
+*
+* Read Path — Parallel Output
+*   All bit outputs are exposed directly as out[0..11]. This produces
+*   the full 12-bit stored word without additional decoding or delays.
+*
+* Structure Summary
+*   • 12 Bit cells
+*   • Shared write-enable line (`load`)
+*   • Parallel 12-bit input/output
+*/
+
+CHIP word12 
+{
+
+    IN in[12], load;
+    OUT out[12];
+    
+    PARTS:
+    Bit(in=in[0], load=load, out=out[0]);
+    Bit(in=in[1], load=load, out=out[1]);
+    Bit(in=in[2], load=load, out=out[2]);
+    Bit(in=in[3], load=load, out=out[3]);
+    Bit(in=in[4], load=load, out=out[4]);
+    Bit(in=in[5], load=load, out=out[5]);
+    Bit(in=in[6], load=load, out=out[6]);
+    Bit(in=in[7], load=load, out=out[7]);
+    Bit(in=in[8], load=load, out=out[8]);
+    Bit(in=in[9], load=load, out=out[9]);
+    Bit(in=in[10], load=load, out=out[10]);
+    Bit(in=in[11], load=load, out=out[11]);
+
+}

@@ -1,0 +1,31 @@
+/**
+* 48-Bit Register (word48)
+* -------------------------
+* This module groups four 12-bit registers (word12) into a single
+* 48-bit storage unit organized in four logical segments.
+*
+* Write Path — Parallel Segment Loading
+*   All four internal word12 registers share the same `load` control
+*   signal. When `load = 1`, each segment captures its corresponding
+*   12-bit input (in0, in1, in2, in3). When `load = 0`, all stored
+*   values are preserved across the entire 48-bit structure.
+*
+* Read Path — Structured Multi-Segment Output
+*   The stored data is exposed through four independent 12-bit
+*   outputs (out0, out1, out2, out3), maintaining the same segment
+*   ordering as the inputs. No decoding or multiplexing is required
+*   for reading; each sub-register outputs directly.
+*/
+
+CHIP word48 
+{
+    IN in3[12], in2[12], in1[12], in0[12], load;
+    OUT out3[12], out2[12], out1[12], out0[12];
+    
+    PARTS:
+    word12(in=in0, load=load, out=out0);
+    word12(in=in1, load=load, out=out1);
+    word12(in=in2, load=load, out=out2);
+    word12(in=in3, load=load, out=out3);
+
+}

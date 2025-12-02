@@ -1,0 +1,38 @@
+/**
+ * Mux (2-to-1 multiplexer)
+ * ------------------------
+ * The multiplexer selects between two input signals (`a` and `b`) according
+ * to the control bit `sel`.
+ *
+ * Behavior:
+ *   - If sel = 0, the output `out` equals `a`.
+ *   - If sel = 1, the output `out` equals `b`.
+ *
+ * Implementation (three-step):
+ *
+ * Stage 1 — Selector inversion
+ *   The control bit `sel` is inverted to produce `notSel`. This allows
+ *   enabling `a` when sel = 0.
+ *
+ * Stage 2 — Input masking
+ *   Each input is gated with the appropriate selector:
+ *     - `a` is ANDed with `notSel` so it propagates only when sel = 0.
+ *     - `b` is ANDed with `sel` so it propagates only when sel = 1.
+ *
+ * Stage 3 — Output combination
+ *   The masked signals are combined with an OR gate to produce the final
+ *   output. This realizes the canonical boolean form:
+ *       out = (a AND ¬sel) OR (b AND sel)
+ */
+
+CHIP Mux 
+{
+    IN a, b, sel;
+    OUT out;
+
+    PARTS:
+    Not(in=sel, out=notSel);
+    And(a=a, b=notSel, out=aAndNotSel);
+    And(a=b, b=sel, out=bAndSel);
+    Or(a=aAndNotSel, b=bAndSel, out=out);
+}

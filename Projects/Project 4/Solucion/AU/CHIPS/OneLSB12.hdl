@@ -1,0 +1,28 @@
+/**
+ * OneLSB12 — 12-bit Constant Generator (LSB = 1)
+ * --------------------------------------------------------
+ * Generates a 12-bit constant with the least significant bit set
+ * to 1 and all other bits set to 0. Output value is 000000000001
+ * in binary (decimal 1).
+ *
+ * Parameters:
+ *   OUT out[12] — 12-bit constant (000000000001)
+ */
+
+CHIP OneLSB12 {
+    OUT out[12];
+
+    PARTS:
+    Or(a=true, b=false, out=out[0]);
+    Or(a=false, b=false, out=out[1]);
+    Or(a=false, b=false, out=out[2]);
+    Or(a=false, b=false, out=out[3]);
+    Or(a=false, b=false, out=out[4]);
+    Or(a=false, b=false, out=out[5]);
+    Or(a=false, b=false, out=out[6]);
+    Or(a=false, b=false, out=out[7]);
+    Or(a=false, b=false, out=out[8]);
+    Or(a=false, b=false, out=out[9]);
+    Or(a=false, b=false, out=out[10]);
+    Or(a=false, b=false, out=out[11]);
+}

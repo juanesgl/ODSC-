@@ -1,0 +1,40 @@
+/**
+ * Sub48 — 48-bit Subtractor
+ * --------------------------------------------------------
+ * Performs 48-bit subtraction using two's complement arithmetic.
+ * The 48-bit operands are split into four 12-bit segments (0..3),
+ * where segment 0 is the LSB and segment 3 is the MSB.
+ *
+ * Subtraction is implemented as addition with negation:
+ *   a - b = a + (-b)
+ *
+ * Parameters:
+ *   IN  a0[12]   — First operand, segment 0 (bits 0-11, LSB)
+ *   IN  a1[12]   — First operand, segment 1 (bits 12-23)
+ *   IN  a2[12]   — First operand, segment 2 (bits 24-35)
+ *   IN  a3[12]   — First operand, segment 3 (bits 36-47, MSB)
+ *   IN  b0[12]   — Second operand, segment 0 (bits 0-11, LSB)
+ *   IN  b1[12]   — Second operand, segment 1 (bits 12-23)
+ *   IN  b2[12]   — Second operand, segment 2 (bits 24-35)
+ *   IN  b3[12]   — Second operand, segment 3 (bits 36-47, MSB)
+ *   OUT out0[12] — Result segment 0 (bits 0-11, LSB)
+ *   OUT out1[12] — Result segment 1 (bits 12-23)
+ *   OUT out2[12] — Result segment 2 (bits 24-35)
+ *   OUT out3[12] — Result segment 3 (bits 36-47, MSB)
+ */
+
+CHIP Sub48 {
+    IN a3[12], a2[12], a1[12], a0[12],
+       b3[12], b2[12], b1[12], b0[12];
+    OUT out3[12], out2[12], out1[12], out0[12];
+
+    PARTS:
+    // Negate b (two's complement)
+    Negate48(in3=b3, in2=b2, in1=b1, in0=b0, 
+             out3=negB3, out2=negB2, out1=negB1, out0=negB0);
+    
+    // Add a + (-b)
+    Add48(a3=a3, a2=a2, a1=a1, a0=a0, 
+          b3=negB3, b2=negB2, b1=negB1, b0=negB0,
+          out3=out3, out2=out2, out1=out1, out0=out0);
+}

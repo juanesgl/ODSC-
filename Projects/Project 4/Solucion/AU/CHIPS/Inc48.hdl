@@ -1,0 +1,27 @@
+/**
+ * Inc48 — 48-bit Incrementer
+ * --------------------------------------------------------
+ * Increments a 48-bit value by 1. The 48-bit input is split into
+ * four 12-bit segments (0..3), where segment 0 is the LSB and
+ * segment 3 is the MSB.
+ *
+ * Parameters:
+ *   IN  in0[12]  — Input segment 0 (bits 0-11, LSB)
+ *   IN  in1[12]  — Input segment 1 (bits 12-23)
+ *   IN  in2[12]  — Input segment 2 (bits 24-35)
+ *   IN  in3[12]  — Input segment 3 (bits 36-47, MSB)
+ *   OUT out0[12] — Output segment 0 (bits 0-11, LSB)
+ *   OUT out1[12] — Output segment 1 (bits 12-23)
+ *   OUT out2[12] — Output segment 2 (bits 24-35)
+ *   OUT out3[12] — Output segment 3 (bits 36-47, MSB)
+ */
+
+CHIP Inc48 {
+    IN in3[12], in2[12], in1[12], in0[12];
+    OUT out3[12], out2[12], out1[12], out0[12];
+
+    PARTS:
+    Add48(a3=in3, a2=in2, a1=in1, a0=in0,
+          b3=false, b2=false, b1=false, b0[0]=true, b0[1..11]=false,
+          out3=out3, out2=out2, out1=out1, out0=out0);
+}

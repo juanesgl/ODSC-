@@ -1,0 +1,44 @@
+/**
+ * Negate48 — 48-bit Two's Complement Negation
+ * --------------------------------------------------------
+ * Computes the two's complement negation of a 48-bit value.
+ * The 48-bit input is split into four 12-bit segments (0..3),
+ * where segment 0 is the LSB and segment 3 is the MSB.
+ *
+ * Two's complement negation is performed in two steps:
+ *   1. Bitwise NOT (one's complement) of all bits
+ *   2. Add 1 to the result
+ *
+ * Parameters:
+ *   IN  in0[12]  — Input segment 0 (bits 0-11, LSB)
+ *   IN  in1[12]  — Input segment 1 (bits 12-23)
+ *   IN  in2[12]  — Input segment 2 (bits 24-35)
+ *   IN  in3[12]  — Input segment 3 (bits 36-47, MSB)
+ *   OUT out0[12] — Output segment 0 (bits 0-11, LSB)
+ *   OUT out1[12] — Output segment 1 (bits 12-23)
+ *   OUT out2[12] — Output segment 2 (bits 24-35)
+ *   OUT out3[12] — Output segment 3 (bits 36-47, MSB)
+ */
+
+CHIP Negate48 {
+    IN in0[12], in1[12], in2[12], in3[12];
+    OUT out0[12], out1[12], out2[12], out3[12];
+
+    PARTS:
+    // One's complement
+    Not12(in=in0, out=not0);
+    Not12(in=in1, out=not1);
+    Not12(in=in2, out=not2);
+    Not12(in=in3, out=not3);
+
+    // Required constants
+    OneLSB12(out=one);            // 000000000001
+    Replicate12(in=false, out=false12);  // 000000000000
+
+    // Two's complement: one's complement + 1
+    Add48(
+        a0=not0, a1=not1, a2=not2, a3=not3,
+        b0=one,  b1=false12, b2=false12, b3=false12,
+        out0=out0, out1=out1, out2=out2, out3=out3
+    );
+}

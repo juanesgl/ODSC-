@@ -1,0 +1,30 @@
+/**
+ * Replicate12 — Single-bit to 12-bit Replicator
+ * --------------------------------------------------------
+ * Replicates a single input bit across all 12 positions of the
+ * output vector. If input is 1, output is 111111111111; if input
+ * is 0, output is 000000000000.
+ *
+ * Parameters:
+ *   IN  in      — Single bit to replicate
+ *   OUT out[12] — 12-bit vector with replicated bit
+ */
+
+CHIP Replicate12 {
+    IN in;
+    OUT out[12];
+    PARTS:
+    // Replicate input bit to all positions
+    And(a=in, b=true, out=out[0]);
+    And(a=in, b=true, out=out[1]);
+    And(a=in, b=true, out=out[2]);
+    And(a=in, b=true, out=out[3]);
+    And(a=in, b=true, out=out[4]);
+    And(a=in, b=true, out=out[5]);
+    And(a=in, b=true, out=out[6]);
+    And(a=in, b=true, out=out[7]);
+    And(a=in, b=true, out=out[8]);
+    And(a=in, b=true, out=out[9]);
+    And(a=in, b=true, out=out[10]);
+    And(a=in, b=true, out=out[11]);
+}
